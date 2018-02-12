@@ -30,7 +30,7 @@
     },
     "Db": {
         "client": "pg",
-        "connection": "postgres://moks:moks@localhost/moks",
+        "connection": "postgres://onumoks:onumoks@localhost/onumoks",
         "pool": {
             "min": 1,
             "max": 10
