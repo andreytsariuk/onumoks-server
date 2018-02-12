@@ -1,0 +1,50 @@
+{
+    "Customer": {
+        "dbConfig": {
+            "host": "prod-db-server"
+        },
+        "credit": {
+            "initialDays": 30
+        }
+    },
+    "Server": {
+        "PORT": "8000"
+    },
+    "IronMQ": {
+        "QueueName": "test_queuest",
+        "Token": "mFIca9B1zpIx9t26mNxZ",
+        "ProjectId": "59664b6ce92bfa000c182aa8",
+        "ApiUrl": "mq-aws-eu-west-1-1.iron.io"
+    },
+    "Session": {
+        // "store": "redis",
+        "secret": "DtNwCESxoMh4452Moksasd5ArscS235",
+        "resave": true,
+        "rolling": true,
+        "saveUninitialized": false,
+        "name": "moks2"
+    },
+    "secret": "mokssecret",
+    "session": {
+        "session": false
+    },
+    "Db": {
+        "client": "pg",
+        "connection": "postgres://moks:moks@localhost/moks",
+        "pool": {
+            "min": 1,
+            "max": 10
+        },
+        "migrations": {
+            "directory": "./db/migrations",
+            "tableName": "migrations"
+        },
+        "seeds": {
+            "directory": "./db/seeds"
+        }
+    },
+    "Console": {
+        "CreaateUSer": "create user moks createdb createuser password 'moks';",
+        "CretareDb": " create database moks owner moks;"
+    }
+}
