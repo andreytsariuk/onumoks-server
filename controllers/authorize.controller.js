@@ -12,6 +12,13 @@ const Errors = require('../errors');
 
 
 module.exports = class {
+
+    /**
+     * 
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     */
     static Post(req, res, next) {
         console.log('req.session', req.session);
         return RequireFilter
@@ -33,7 +40,14 @@ module.exports = class {
             });
 
     }
-    static Verify(req, res) {
+
+    /**
+     * 
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     */
+    static Verify(req, res, next) {
         if (!RequireFilter.Check(req.body, requireFields.Verify))
             return res.status(401).send('Unathorize')
 
