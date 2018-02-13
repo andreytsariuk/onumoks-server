@@ -22,43 +22,47 @@ module.exports = class {
     static Avatar(req, res, next) {
         return req
             .User
-            .related('profile')
-            .avatar()
-            .then(avatarPath => {
-                console.log('avatarPath', avatarPath);
+            .load(['profile', 'profile.avatars'])
+            .then(user => {
+                console.log('avatarPath', user.toJSON());
+
+                let [avatar] = user.related('profile').related('avatars').models;
+                return avatar
+            })
+            .then(avatar => {
                 let img;
                 try {
-                    img = fs.readFileSync(avatarPath);
+                    img = fs.readFileSync(avatar.path());
                 } catch (error) {
                     img = fs.readFileSync(`${process.cwd()}/images/avatars/placeholder.png`);
                     // throw new Server.FileDoesNotExist();
                 }
 
-                res.writeHead(200, { 'Content-Type': 'image/gif' });
+                res.writeHead(200, { 'Content-Type': avatar.get('mime_type') });
                 res.end(img, 'binary');
             })
-            .catch(err => next(err));
+            .catch(next);
 
     }
 
     static UploadAvatar(req, res, next) {
-        console.log('UploadAvatar', req.file);
-        return req
-            .User
-            .related('profile')
-            .save({
-                avatar: req.file.filename
+        return Bookshelf
+            .transaction(transacting => {
+                return new Avatar({
+                    name: req.file.filename,
+                    mime_type: req.file.mimetype
+                }).save(null, { transacting })
+                    .then(avatar => new Files({
+                        file_id: avatar.id,
+                        file_type: 'avatars',
+                        user_id: req.User.id
+                    }).save(null, { transacting }))
             })
-            .then(() => res.end())
-            .catch(err => next(err));
+            .then(file => req.status(200).send(file))
+            .catch(next);
 
     }
-    static List(req, res) {
 
-    }
-    static Post(req, res) {
-
-    }
 
     static Put(req, res, next) {
         console.log('req.body', req.body);
@@ -73,9 +77,7 @@ module.exports = class {
                 .User))
             .catch(err => next(err));
     }
-    static Delete(req, res) {
 
-    }
 }
 
 

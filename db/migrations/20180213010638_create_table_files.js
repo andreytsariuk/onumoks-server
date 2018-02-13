@@ -18,9 +18,16 @@ exports.up = function (knex) {
                 .bigInteger('user_id')
                 .references('users.id');
             table
+                .timestamp('created_at')
+                .defaultTo(knex.fn.now())
+                .notNullable();
+            table
+                .timestamp('updated_at')
+                .defaultTo(knex.fn.now())
+                .notNullable();
+
+            table
                 .unique(['file_id', 'file_type']);
-            table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-            table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
         })
         .createTable('books', function (table) {
             table
@@ -29,9 +36,19 @@ exports.up = function (knex) {
             table
                 .string('mime_type');
             table
-                .string('path');
-            table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-            table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+                .string('name')
+                .notNullable();
+            table
+                .timestamp('created_at')
+                .defaultTo(knex.fn.now())
+                .notNullable();
+            table
+                .timestamp('updated_at')
+                .defaultTo(knex.fn.now())
+                .notNullable();
+
+            table
+                .unique(['name', 'mime_type']);
         })
         .createTable('images', function (table) {
             table
@@ -40,9 +57,19 @@ exports.up = function (knex) {
             table
                 .string('mime_type');
             table
-                .string('path');
-            table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-            table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+                .string('name')
+                .notNullable();
+            table
+                .timestamp('created_at')
+                .defaultTo(knex.fn.now())
+                .notNullable();
+            table
+                .timestamp('updated_at')
+                .defaultTo(knex.fn.now())
+                .notNullable();
+
+            table
+                .unique(['name', 'mime_type']);
         })
         .createTable('documents', function (table) {
             table
@@ -51,9 +78,40 @@ exports.up = function (knex) {
             table
                 .string('mime_type');
             table
-                .string('path');
-            table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
-            table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
+                .string('name')
+                .notNullable();
+            table
+                .timestamp('created_at')
+                .defaultTo(knex.fn.now())
+                .notNullable();
+            table
+                .timestamp('updated_at')
+                .defaultTo(knex.fn.now())
+                .notNullable();
+
+            table
+                .unique(['name', 'mime_type']);
+        })
+        .createTable('avatars', function (table) {
+            table
+                .increments('id')
+                .primary();
+            table
+                .string('mime_type');
+            table
+                .string('name')
+                .notNullable();
+            table
+                .timestamp('created_at')
+                .defaultTo(knex.fn.now())
+                .notNullable();
+            table
+                .timestamp('updated_at')
+                .defaultTo(knex.fn.now())
+                .notNullable();
+
+            table
+                .unique(['name', 'mime_type']);
         });
 };
 
@@ -62,5 +120,6 @@ exports.down = function (knex) {
         .dropTable('documents')
         .dropTable('images')
         .dropTable('books')
+        .dropTable('avatars')
         .dropTable('files');
 };
