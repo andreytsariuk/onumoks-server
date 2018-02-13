@@ -12,6 +12,8 @@ exports.up = function (knex) {
                 .unique();
             table
                 .string('password');
+            table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
+            table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
         })
         .createTable('roles', function (table) {
             table
@@ -32,40 +34,27 @@ exports.up = function (knex) {
 
             table
                 .unique(['user_id', 'role_id', 'role_type']);
+            table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
+            table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
         })
 
         .createTable('students', function (table) {
             table
                 .increments('id')
                 .primary();
-            table
-                .bigInteger('user_id')
-                .notNullable()
-                .references('users.id')
-                .onDelete('CASCADE')
-                .unique();
+
         })
         .createTable('lectors', function (table) {
             table
                 .increments('id')
                 .primary();
-            table
-                .bigInteger('user_id')
-                .notNullable()
-                .references('users.id')
-                .onDelete('CASCADE')
-                .unique();
+
         })
         .createTable('admins', function (table) {
             table
                 .increments('id')
                 .primary();
-            table
-                .bigInteger('user_id')
-                .notNullable()
-                .references('users.id')
-                .onDelete('CASCADE')
-                .unique();
+
         })
         .createTable('profiles', function (table) {
             table
@@ -75,7 +64,8 @@ exports.up = function (knex) {
                 .bigInteger('user_id')
                 .notNullable()
                 .references('users.id')
-                .onDelete('CASCADE');
+                .onDelete('CASCADE')
+                .unique();
             table
                 .string('gender');
             table
@@ -90,6 +80,8 @@ exports.up = function (knex) {
                 .string('personal_email');
             table
                 .string('work_email');
+            table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
+            table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
         })
         .createTable('settings', function (table) {
             table
@@ -104,6 +96,8 @@ exports.up = function (knex) {
                 .string('language')
                 .notNullable()
                 .defaultTo('eng');
+            table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();
+            table.timestamp('updated_at').defaultTo(knex.fn.now()).notNullable();
         });
 };
 
