@@ -1,19 +1,16 @@
-const Bookshelf = require('../config/bookshelf');
+const Bookshelf = require('../../../config/bookshelf');
 const knex = Bookshelf.knex;
 const Promise = require('bluebird');
 
-const _ = require('lodash');
-const { Message, Token } = require('./');
-const { AccessTokenHelper } = require('../helpers');
 
-const Role = require('./role.model');
-const User = require('./user.model');
+// const Roles = require('./role.model');
+const Users = require('../Users.model');
 
 
 module.exports = Bookshelf.model('Book', Bookshelf.Model.extend({
     tableName: 'books',
     owner: function () {
-        return this.hasOne('User');
+        return this.hasOne('Users');
     },
     image: function () {
         return new Promise((resolve, reject) => {

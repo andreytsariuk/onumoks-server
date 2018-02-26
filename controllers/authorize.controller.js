@@ -1,11 +1,11 @@
 const { RequireFilter } = require('../filters');
-const { User } = require('../db/models');
+const { Users } = require('../db/models');
 const _ = require('lodash');
 const md5 = require('md5');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 const requireFields = {
-    Post: ['email', 'password'],
+    Post: ['email', 'password', 'workspace_id'],
     Verify: ['token']
 }
 const Errors = require('../errors');
@@ -20,20 +20,24 @@ module.exports = class {
      * @param {*} next 
      */
     static Post(req, res, next) {
-        console.log('req.session', req.session);
         return RequireFilter
             .Check(req.body, requireFields.Post)
-            .then(validated => new User({
-                email: _.get(req.body, 'email'),
-                password: md5(_.get(req.body, 'password'))
+            .then(validated => new Users({
+                email: validated.email,
+                password: md5(validated.password),
+                workspace_id: validated.workspace_id
             })
-                .fetch({ require: true }))
-            .then(user => {
-                user.set('token', jwt.sign({ user }, config.get('secret')))
-                res.send(user);
-            })
+                .fetch({
+                    require: true,
+                    withRelated: ['profile', 'profile.avatars', 'roles', 'workspace']
+                },
+            ))
+            .then(user => res.status(200).send({
+                user: user.toJSON(),
+                acces_token: jwt.sign({ user }, config.get('secret'))
+            }))
             .catch(err => {
-                if (err instanceof User.NotFoundError) {
+                if (err instanceof Users.NotFoundError) {
                     return next(new Errors.Server.InvalidCredentials());
                 }
                 next(err);

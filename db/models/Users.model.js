@@ -5,17 +5,21 @@ const _ = require('lodash');
 
 const Roles = require('./Roles.model');
 const Profiles = require('./Profiles.model');
-
+const Workspaces = require('./Workspaces.model')
 
 module.exports = Bookshelf.model('User', Bookshelf.Model.extend({
     tableName: 'users',
     hidden: ['password'],
     hasTimestamps: true,
-    roles: () => {
+    roles: function () {
         return this.hasMany('Roles');
     },
     profile: function () {
         return this.hasOne('Profiles');
+    },
+    workspace() {
+        return this.belongsTo('Workspaces');
+
     },
     is: function (roleName) {
         let answer = false;

@@ -1,10 +1,10 @@
 
-const Bookshelf = require('../config/bookshelf');
+const Bookshelf = require('../../../config/bookshelf');
 const knex = Bookshelf.knex;
 const Promise = require('bluebird');
-const Profiles = require('./Profiles.model');
-const Files = require('./Files.model');
-
+const Profiles = require('../Profiles.model');
+const Files = require('../Files.model');
+const config = require('config');
 
 module.exports = Bookshelf.model('Avatars', Bookshelf.Model.extend({
     tableName: 'avatars',
@@ -30,6 +30,10 @@ module.exports = Bookshelf.model('Avatars', Bookshelf.Model.extend({
     },
     path: function () {
         return (`${process.cwd()}/images/avatars/${this.get('name')}`);
-
+    },
+    virtuals: {
+        publicPath: function () {
+            return (`${config.get('Server.Url')}/images/avatars/${this.get('name')}`);
+        }
     }
 }));

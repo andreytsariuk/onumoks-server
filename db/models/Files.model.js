@@ -1,5 +1,5 @@
 
-const Bookshelf = require('../config/bookshelf');
+const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
 const Promise = require('bluebird');
 const Profiles = require('./Profiles.model');
@@ -11,7 +11,7 @@ module.exports = Bookshelf.model('Files', Bookshelf.Model.extend({
     files() {
         return this.morphTo('file', 'Avatars', 'Books', 'Documents', 'Images');
     },
-    path(){
+    path() {
 
     }
 }));

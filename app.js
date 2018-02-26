@@ -44,21 +44,7 @@ app.use(function (req, res, next) {
   next();
 });
 
-(function initSession() {
-  let maxAge = 1000 * 60 * 60 * 24;
-  let cookie = { maxAge };
 
-  console.log('initSession maxAge', maxAge);
-  let { store, secret, resave, saveUninitialized, name, rolling } = config.get('Session');
-  switch (store) {
-    case 'redis':
-      store = new RedisStore();
-      break;
-    default:
-      store = new session.MemoryStore();
-  }
-  app.use(session({ store, secret, resave, saveUninitialized, name, rolling, cookie }))
-})();
 
 
 app.use(express.static(path.join(__dirname, 'public')));

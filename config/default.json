@@ -8,6 +8,7 @@
         }
     },
     "Server": {
+        "Url": "http://localhost:8000",
         "PORT": "8000"
     },
     "IronMQ": {

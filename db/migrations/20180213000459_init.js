@@ -1,8 +1,8 @@
 "use strict";
 
-exports.up = function(knex) {
+exports.up = function (knex) {
   return knex.schema
-    .createTable("workspaces", function(table) {
+    .createTable("workspaces", function (table) {
       table.increments("id").primary();
       table
         .string("name")
@@ -17,7 +17,7 @@ exports.up = function(knex) {
         .defaultTo(knex.fn.now())
         .notNullable();
     })
-    .createTable("users", function(table) {
+    .createTable("users", function (table) {
       table.increments("id").primary();
       table
         .string("email")
@@ -38,7 +38,7 @@ exports.up = function(knex) {
         .defaultTo(knex.fn.now())
         .notNullable();
     })
-    .createTable("roles", function(table) {
+    .createTable("roles", function (table) {
       table.increments("id").primary();
       table
         .bigInteger("user_id")
@@ -60,16 +60,16 @@ exports.up = function(knex) {
         .notNullable();
     })
 
-    .createTable("students", function(table) {
+    .createTable("students", function (table) {
       table.increments("id").primary();
     })
-    .createTable("lectors", function(table) {
+    .createTable("lectors", function (table) {
       table.increments("id").primary();
     })
-    .createTable("admins", function(table) {
+    .createTable("admins", function (table) {
       table.increments("id").primary();
     })
-    .createTable("profiles", function(table) {
+    .createTable("profiles", function (table) {
       table.increments("id").primary();
       table
         .bigInteger("user_id")
@@ -93,7 +93,7 @@ exports.up = function(knex) {
         .defaultTo(knex.fn.now())
         .notNullable();
     })
-    .createTable("settings", function(table) {
+    .createTable("settings", function (table) {
       table.increments("id").primary();
       table
         .bigInteger("user_id")
@@ -115,7 +115,7 @@ exports.up = function(knex) {
     });
 };
 
-exports.down = function(knex) {
+exports.down = function (knex) {
   return knex.schema
     .dropTable("workspaces")
     .dropTable("roles")

@@ -4,7 +4,7 @@ const Users = require('./Users.model');
 const { Lectors, Admins, Students } = require('./rolesTypes')
 
 
-module.exports = Bookshelf.model('Role', Bookshelf.Model.extend({
+module.exports = Bookshelf.model('Roles', Bookshelf.Model.extend({
     tableName: 'roles',
     hasTimestamps: true,
     // visible: ['name'],
