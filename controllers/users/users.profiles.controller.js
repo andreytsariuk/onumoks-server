@@ -1,14 +1,14 @@
 const fs = require('fs');
 
 
-const { RequireFilter } = require('../filters');
+const { RequireFilter } = require('../../filters');
 const md5 = require('md5');
-const { User } = require('../models');
+const { User } = require('../../db/models');
 const _ = require('lodash');
 const Promise = require('bluebird');
-const Bookshelf = require('../config/bookshelf');
+const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
-const { Server } = require('../errors');
+const { Server } = require('../../errors');
 
 
 const requireFields = {

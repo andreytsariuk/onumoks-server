@@ -1,4 +1,4 @@
-const Bookshelf = require('../config/bookshelf');
+const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
 const Promise = require('bluebird');
 const _ = require('lodash');
@@ -24,8 +24,8 @@ module.exports = Bookshelf.model('User', Bookshelf.Model.extend({
                 withRelated: ['roles']
             })
             .then(user => {
-                let roleArray= user.related('roles').map(role => role.get('role_type'));
-                return rolesArray.indexOf(roleName)!==-1 || rolesArray.indexOf(`${roleName}s`)!==-1
+                let roleArray = user.related('roles').map(role => role.get('role_type'));
+                return rolesArray.indexOf(roleName) !== -1 || rolesArray.indexOf(`${roleName}s`) !== -1
             });
     },
     // virtuals: {

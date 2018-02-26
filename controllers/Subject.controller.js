@@ -1,5 +1,5 @@
 const { RequireFilter } = require('../filters');
-const { Subject } = require('../models');
+const { Subject } = require('../db/models');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const Bookshelf = require('../config/bookshelf');
@@ -37,15 +37,15 @@ module.exports = class {
             .catch(err => next(err));
 
     }
-    static Post(req, res,next) {
-        console.log('Create Subject',req.body)
+    static Post(req, res, next) {
+        console.log('Create Subject', req.body)
         return RequireFilter
             .Check(req.body, requireFields.Post)
-            .then(validated => 
+            .then(validated =>
                 new Subject({
-                title: validated.title,
-                description: validated.description
-            }).save())
+                    title: validated.title,
+                    description: validated.description
+                }).save())
             .then(res.end())
             .catch(err => next(err));
 

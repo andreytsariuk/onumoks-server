@@ -1,7 +1,7 @@
-const Bookshelf = require('../config/bookshelf');
+const Bookshelf = require('../../config/bookshelf');
 
 const Users = require('./Users.model');
-const {Lectors,Admins,Students} = require('./rolesTypes')
+const { Lectors, Admins, Students } = require('./rolesTypes')
 
 
 module.exports = Bookshelf.model('Role', Bookshelf.Model.extend({

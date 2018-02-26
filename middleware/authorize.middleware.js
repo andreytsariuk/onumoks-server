@@ -1,5 +1,5 @@
 //const UnauthorizedException = require('../../errors/exceptions').UnauthorizedException;
-const { User } = require('../models');
+const { User } = require('../db/models');
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 const config = require('config');

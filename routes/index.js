@@ -1,27 +1,17 @@
+const AppRouter = require("express").Router();
+const config = require("config");
+// const ApiRouter = require("./api");
+const AuthRouter = require("./auth");
 
-const router = require('express').Router();
-const config = require('config');
-const Api = require('./api');
-var path = require("path");
-const passport = require('passport');
+const path = require("path");
+const { ErrorsMiddleweare, AuthorizeMidddleweare } = require("../middleware");
+// const { AuthorizeController, UserController } = require("../controllers");
 
-const { ErrorsMiddleweare, AuthorizeMidddleweare } = require('../middleware');
-const { AuthorizeController, UserController } = require('../controllers');
 /* GET home page. */
 
+// AppRouter.use("/api", Api);
+AppRouter.use("/auth", AuthRouter);
 
-// Api.use(passport.authenticate('jwt', config.get('session')))
+AppRouter.use("*", ErrorsMiddleweare);
 
-router.use('/api', Api);
-router.post('/authorize', AuthorizeController.Post);
-router.post('/registration', UserController.Registration);
-router.post('/authorize/token', AuthorizeController.Verify);
-
-// router.get('*', (req, res) => {
-//     return res.sendFile(path.join(__dirname + '/../public/index.html'));
-// });
-//router.use(allowCrossDomain);
-router.use('*', ErrorsMiddleweare);
-
-
-module.exports = router;
+module.exports = AppRouter;

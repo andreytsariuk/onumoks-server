@@ -1,5 +1,5 @@
 const { RequireFilter } = require('../filters');
-const { User } = require('../models');
+const { User } = require('../db/models');
 const _ = require('lodash');
 const md5 = require('md5');
 const jwt = require('jsonwebtoken');

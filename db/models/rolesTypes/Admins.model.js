@@ -1,8 +1,8 @@
-const Bookshelf = require('../config/bookshelf');
+const Bookshelf = require('../../../config/bookshelf');
 const knex = Bookshelf.knex;
 const Promise = require('bluebird');
-const Roles = require('./Roles.model');
-const Users = require('./Users.model');
+const Roles = require('../Roles.model');
+const Users = require('../Users.model');
 
 
 module.exports = Bookshelf.model('Admins', Bookshelf.Model.extend({

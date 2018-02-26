@@ -1,10 +1,10 @@
-const { RequireFilter } = require('../filters');
+const { RequireFilter } = require('../../filters');
 const md5 = require('md5');
-const { User, Roles, Courses, Specialties, Statuses } = require('../models');
-const Errors = require('../errors');
+const { User, Roles, Courses, Specialties, Statuses } = require('../../db/models');
+const Errors = require('../../errors');
 const _ = require('lodash');
 const Promise = require('bluebird');
-const Bookshelf = require('../config/bookshelf');
+const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
 const requireFields = {
     Post: ['email', 'role', 'fname', 'lname'],

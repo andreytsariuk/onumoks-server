@@ -1,5 +1,5 @@
 const { RequireFilter } = require('../filters');
-const { Courses } = require('../models');
+const { Courses } = require('../db/models');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const Bookshelf = require('../config/bookshelf');

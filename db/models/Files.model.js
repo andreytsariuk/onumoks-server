@@ -10,5 +10,8 @@ module.exports = Bookshelf.model('Files', Bookshelf.Model.extend({
     tableName: 'files',
     files() {
         return this.morphTo('file', 'Avatars', 'Books', 'Documents', 'Images');
+    },
+    path(){
+
     }
 }));

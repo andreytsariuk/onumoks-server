@@ -1,5 +1,5 @@
 const { RequireFilter } = require('../filters');
-const { Specialties } = require('../models');
+const { Specialties } = require('../db/models');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const Bookshelf = require('../config/bookshelf');
@@ -59,7 +59,7 @@ module.exports = class {
 
     }
 
-    static Put(req, res,next) {
+    static Put(req, res, next) {
         console.log('Create Specialties', req.body)
         return RequireFilter
             .Check(req.body, requireFields.Post)
