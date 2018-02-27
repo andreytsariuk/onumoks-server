@@ -8,8 +8,8 @@
         }
     },
     "Server": {
-        "Url": "https://instudy-backend.herokuapp.com/",
-        "PORT": "8000"
+        "Url": "https://instudy-backend.herokuapp.com",
+        "PORT": "3000"
     },
     "IronMQ": {
         "QueueName": "test_queuest",
