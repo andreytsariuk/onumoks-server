@@ -1,0 +1,52 @@
+{
+    "Customer": {
+        "dbConfig": {
+            "host": "prod-db-server"
+        },
+        "credit": {
+            "initialDays": 30
+        }
+    },
+    "Server": {
+        "Url": "https://instudy-backend.herokuapp.com/",
+        "PORT": "8000"
+    },
+    "IronMQ": {
+        "QueueName": "test_queuest",
+        "Token": "mFIca9B1zpIx9t26mNxZ",
+        "ProjectId": "59664b6ce92bfa000c182aa8",
+        "ApiUrl": "mq-aws-eu-west-1-1.iron.io"
+    },
+    "Session": {
+        // "store": "redis",
+        "secret": "DtNwCESxoMh4452Moksasd5ArscS235",
+        "resave": true,
+        "rolling": true,
+        "saveUninitialized": false,
+        "name": "moks2"
+    },
+    "secret": "mokssecret",
+    "session": {
+        "session": false
+    },
+    "Db": {
+        "client": "pg",
+        "connection": "postgres://hvoobvjayftryx:d46aa8783a987adf9702f89c53e9e7af620d702f3aef71f8908580bae3145d83@ec2-79-125-110-209.eu-west-1.compute.amazonaws.com:5432/d2s6959hit9c8o",
+        "pool": {
+            "min": 1,
+            "max": 10
+        },
+        "migrations": {
+            "directory": "./db/migrations",
+            "tableName": "migrations"
+        },
+        "seeds": {
+            "directory": "./db/seeds"
+        },
+        "ssl": true
+    },
+    "Console": {
+        "CreaateUSer": "create user moks createdb createuser password 'moks';",
+        "CretareDb": " create database moks owner moks;"
+    }
+}
