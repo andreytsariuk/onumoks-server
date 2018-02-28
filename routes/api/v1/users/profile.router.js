@@ -1,20 +1,20 @@
 const Router = require('express').Router;
 const _ = require('lodash');
-const { UserProfileController } = require('../../../controllers');
-const { AvatarUploadMiddleware } = require('../../../middleware');
+const { UserController } = require('../../../../controllers');
+const { AvatarUploadMiddleware } = require('../../../../middleware');
 
 
 
 let ProfileRouter = Router();
 
-ProfileRouter.put('/', UserProfileController.Put);
+ProfileRouter.put('/', UserController.Profile.Put);
 
 
 
 
 
-ProfileRouter.get('/avatar', UserProfileController.Avatar);
-ProfileRouter.post('/avatar', AvatarUploadMiddleware, UserProfileController.UploadAvatar);
+ProfileRouter.get('/avatar', UserController.Profile.Avatar);
+ProfileRouter.post('/avatar', AvatarUploadMiddleware, UserController.Profile.UploadAvatar);
 
 
 

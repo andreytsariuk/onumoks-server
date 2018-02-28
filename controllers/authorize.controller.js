@@ -34,7 +34,9 @@ module.exports = class {
             ))
             .then(user => res.status(200).send({
                 user: user.toJSON(),
-                acces_token: jwt.sign({ user }, config.get('secret'))
+                access_token: jwt.sign({ user }, config.get('secret')),
+                workspace: user.related('workspace').toJSON(),
+                roles: user.roles
             }))
             .catch(err => {
                 if (err instanceof Users.NotFoundError) {

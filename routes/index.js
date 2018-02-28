@@ -1,6 +1,6 @@
 const AppRouter = require("express").Router();
 const config = require("config");
-// const ApiRouter = require("./api");
+const ApiRouter = require("./api");
 const AuthRouter = require("./auth");
 
 const path = require("path");
@@ -9,7 +9,7 @@ const { ErrorsMiddleweare, AuthorizeMidddleweare } = require("../middleware");
 
 /* GET home page. */
 
-// AppRouter.use("/api", Api);
+AppRouter.use("/api", ApiRouter);
 AppRouter.use("/auth", AuthRouter);
 
 AppRouter.use("*", ErrorsMiddleweare);

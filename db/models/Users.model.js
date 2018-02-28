@@ -27,15 +27,15 @@ module.exports = Bookshelf.model('User', Bookshelf.Model.extend({
             .refresh({
                 withRelated: ['roles']
             })
-            .then(user => {
-                let roleArray = user.related('roles').map(role => role.get('role_type'));
-                return rolesArray.indexOf(roleName) !== -1 || rolesArray.indexOf(`${roleName}s`) !== -1
-            });
+            .then(user => user.roles.indexOf(roleName) !== -1 || rolesArray.indexOf(`${roleName}s`) !== -1);
     },
-    // virtuals: {
-    //     fullName: function () {
-    //         return this.get('firstName') + ' ' + this.get('lastName');
-    //     }
-    // }
+    virtuals: {
+        // fullName: function () {
+        //     return this.get('firstName') + ' ' + this.get('lastName');
+        // }
+        short_roles: function () {
+            return this.related('roles').map(role => role.get('role_type'));
+        }
+    }
 
 }));

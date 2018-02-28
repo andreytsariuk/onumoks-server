@@ -1,36 +1,34 @@
 const Router = require('express').Router;
 const _ = require('lodash');
-const { UserController } = require('../../controllers');
-const { User } = require('../../models');
-const { ProfileRouter } = require('./Users');
+const { UserController } = require('../../../../controllers');
+const { Users } = require('../../../../db/models');
+// const { ProfileRouter } = require('./Users');
+
+const UserRouter = Router();
 
 
-let UserRouter = Router();
-UserRouter.param('user', function (req, res, next, id) {
-  return new User({ id: id })
-    .fetch({ require: true, withRelated: ['profile'] })
-    .then(user => {
-      req.User = user;
-      return next();
-    })
-    .catch(error => {
-      if (error instanceof User.NotFoundError)
-        return res.status(404).json({
-          error: 'User ' + id + ' not found'
-        });
-      return next(error);
-    })
+UserRouter.get('/', UserController.Main.List);
+UserRouter.post('/', UserController.Main.Post);
+
+
+
+UserRouter.param('user_id', function (req, res, next, user_id) {
+  console.log('FETCH PARAMS')
+  return new Users({ id: user_id })
+    .fetch({ require: true, withRelated: ['profile', 'roles'] })
+    .then(user => req.User = user)
+    .then(() => next())
+    .catch(next)
 });
 
-UserRouter.get('/', UserController.List);
-UserRouter.post('/', UserController.Post);
-UserRouter.put('/:users', UserController.Put);
+
+UserRouter.put('/:user_id', UserController.Main.Put);
 //UserRouter.get('/:users', UserController.Get);
-UserRouter.get('/:users/stats', UserController.Stats);
+UserRouter.get('/:user_id/stats', UserController.Main.Stats);
 
-UserRouter.get('/:user', UserController.Get);
+UserRouter.get('/:user_id', UserController.Main.Get);
 
 
-UserRouter.use('/:user/profile', ProfileRouter);
+// UserRouter.use('/:user/profile', ProfileRouter);
 
 module.exports = UserRouter;

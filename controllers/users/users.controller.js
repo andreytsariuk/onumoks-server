@@ -1,6 +1,6 @@
 const { RequireFilter } = require('../../filters');
 const md5 = require('md5');
-const { User, Roles, Courses, Specialties, Statuses } = require('../../db/models');
+const { Users, Roles, Courses, Specialties, Statuses } = require('../../db/models');
 const Errors = require('../../errors');
 const _ = require('lodash');
 const Promise = require('bluebird');
@@ -13,69 +13,67 @@ const requireFields = {
 }
 
 module.exports = class {
-    static List(req, res, next) {
 
+    /**
+     * Function will return all users with paggination
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     */
+    static List(req, res, next) {
         return RequireFilter
             .Check(req.query, requireFields.List)
-            .then(validated => Promise
-                .all([
-                    new User()
-                        .query(function (qb) {
+            .then(validated => new Users()
+                .query(function (qb) {
+                    // qb
+                    //     .select(knex.raw('users.*'))
+                    //     .leftOuterJoin('profiles', 'users.id', 'profiles.user_id')
+                    // // .leftOuterJoin('roles_users', 'users.id', 'roles_users.user_id')
+                    // // .leftOuterJoin('roles', 'roles_users.role_id', 'roles.id');
 
-                            console.log('req.query', req.query);
-                            qb
-                                .select(knex.raw('users.*'))
-                                .leftOuterJoin('profiles', 'users.id', 'profiles.user_id')
-                                .leftOuterJoin('roles_users', 'users.id', 'roles_users.user_id')
-                                .leftOuterJoin('roles', 'roles_users.role_id', 'roles.id')
+                    // if (req.query.filter) {
+                    //     let filter = JSON.parse(req.query.filter);
+                    //     if (filter.all)
+                    //         qb
+                    //             .where(knex.raw(`LOWER(profiles.fname) like '%${filter.all}%'`))
+                    //             .orWhere(knex.raw(`LOWER(profiles.lname) like '%${filter.all}%'`))
+                    //             .orWhere(knex.raw(`LOWER(users.email) like '%${filter.all}%'`))
 
 
-                            if (req.query.filter) {
-                                let filter = JSON.parse(req.query.filter);
-                                if (filter.all) {
+                    // if (filter.role) {
+                    //     qb
+                    //         .where('roles.name', filter.role)
 
-                                    qb
-                                        .where(knex.raw(`LOWER(profiles.fname) like '%${filter.all}%'`))
-                                        .orWhere(knex.raw(`LOWER(profiles.lname) like '%${filter.all}%'`))
-                                        .orWhere(knex.raw(`LOWER(users.email) like '%${filter.all}%'`))
+                    // }
+                    // }
+                    // console.log('qb', qb.toString())
+                })
+                .fetchPage({
+                    pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
+                    page: validated.page, // Defaults to 1 if not specified
+                    withRelated: ['roles', 'profile', 'profile']
+                }))
+            .then(result => {
 
-                                }
-                                if (filter.role) {
-                                    qb
-                                        .where('roles.name', filter.role)
-
-                                }
-                            }
-                            console.log('qb', qb.toString())
-                        })
-                        .fetchPage({
-                            pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
-                            page: validated.page, // Defaults to 1 if not specified
-                            withRelated: ['roles', 'profile']
-                        })
-                    // .then(users => users.models)
-                    // .map(user => user
-                    //     .related('profile')
-                    //     .avatar()
-                    //     .then(path => user
-                    //         .set('avatar', path)
-                    //     )),
-                    ,
-                    new User().count()
-                ]))
-            .spread((users, usersCount) => {
-                console.log('usersCount', usersCount);
-                users = users.map(user => user.toJSON()).map(user => { user.roles = _.map(user.roles, 'name'); return user; });
-                return res.json({
-                    items: users,
-                    page: parseInt(req.query.page),
-                    rowsPerPage: parseInt(req.query.rowsPerPage),
-                    total: parseInt(usersCount)
+                return res.status(200).send({
+                    items: result.toJSON(),
+                    pagination: result.pagination
                 });
             })
-            .catch(err => next(err))
-
+            .catch(next)
     }
+
+
+
+
+
+
+    /**
+     * Function will create Users 
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     */
     static Post(req, res, next) {
         let _validated;
 
@@ -88,7 +86,7 @@ module.exports = class {
                 })
                     .fetch({ require: true })
                     .then(status =>
-                        new User({
+                        new Users({
                             email: _.get(req.body, 'email'),
                             password: validated.password ? md5(validated.password) : 'no_password',
                             status: status.id
@@ -99,7 +97,7 @@ module.exports = class {
                                 if (err.constraint) {
                                     switch (true) {
                                         case err.constraint === 'users_email_unique':
-                                            throw new Errors.User.EmailExist()
+                                            throw new Errors.Users.EmailExist()
                                             break;
 
                                         default:
@@ -148,14 +146,15 @@ module.exports = class {
     }
 
     static Get(req, res) {
-        return res.send(req.User);
+        console.log('req.User', req.User.id)
+        return res.status(200).send(req.User);
 
     }
     static Registration(req, res) {
 
         return RequireFilter
             .Check(req.body, requireFields.Post)
-            .then(validated => new User({
+            .then(validated => new Users({
                 email: _.get(req.body, 'email'),
                 password: md5(_.get(req.body, 'password'))
             }))
@@ -172,7 +171,7 @@ module.exports = class {
 
     }
     static Stats(req, res) {
-        new User({
+        new Users({
             id: req.user.id
         })
             .fetch({ require: true })
