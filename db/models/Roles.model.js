@@ -11,7 +11,7 @@ module.exports = Bookshelf.model('Roles', Bookshelf.Model.extend({
     users: function () {
         return this.belongsTo('Users');
     },
-    roleType: () => {
+    roleType: function () {
         return this.morphTo('role', 'Students', 'Admins', 'Lectors');
     }
 }));

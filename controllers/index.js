@@ -1,6 +1,7 @@
 module.exports = {
     // MessageController: require('./message.controller'),
     UserController: require('./users'),
+    AdminController: require('./admin'),
     AuthorizeController: require('./authorize.controller'),
     SubjectController: require('./Subject.controller'),
     SpecialtiesController: require('./Specialties.controller'),

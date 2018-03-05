@@ -22,9 +22,7 @@ module.exports = class {
         project_id = project_id ? project_id : config.get("IronMQ.ProjectId");
         queue_name = queue_name ? queue_name : config.get("IronMQ.QueueName");
         //=================Defaut==================
-        console.log('token', token);
-        console.log('project_id', project_id);
-        console.log('queue_name', queue_name);
+
         this.imq = new iron_mq.Client({
             token: token,
             project_id: project_id,
@@ -46,8 +44,8 @@ module.exports = class {
             this.imq.post(JSON.stringify(message), (error, body) => {
                 console.log('resssss', body)
                 if (error)
-                     reject(error);
-                 resolve(body);
+                    reject(error);
+                resolve(body);
             });
         });
     }

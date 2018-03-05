@@ -7,7 +7,7 @@ const Roles = require('./Roles.model');
 const Profiles = require('./Profiles.model');
 const Workspaces = require('./Workspaces.model')
 
-module.exports = Bookshelf.model('User', Bookshelf.Model.extend({
+module.exports = Bookshelf.model('Users', Bookshelf.Model.extend({
     tableName: 'users',
     hidden: ['password'],
     hasTimestamps: true,
@@ -19,7 +19,6 @@ module.exports = Bookshelf.model('User', Bookshelf.Model.extend({
     },
     workspace() {
         return this.belongsTo('Workspaces');
-
     },
     is: function (roleName) {
         let answer = false;
@@ -30,9 +29,9 @@ module.exports = Bookshelf.model('User', Bookshelf.Model.extend({
             .then(user => user.roles.indexOf(roleName) !== -1 || rolesArray.indexOf(`${roleName}s`) !== -1);
     },
     virtuals: {
-        // fullName: function () {
-        //     return this.get('firstName') + ' ' + this.get('lastName');
-        // }
+        name: function () {
+            return this.related('profile').get('lname') + ' ' + this.related('profile').get('fname');
+        },
         short_roles: function () {
             return this.related('roles').map(role => role.get('role_type'));
         }

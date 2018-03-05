@@ -3,7 +3,7 @@ const { UsersRouter } = require('./users');
 // const SpecialtiesRouter = require('./specialties.router');
 // const CoursesRouter = require('./courses.router');
 
-
+const AdminRouter = require('./admin')
 
 // const MessageRouter = require('./messages.router');
 
@@ -19,6 +19,8 @@ ApiRouter.use(AuthorizeMidddleweare);
 /**Paths */
 // ApiRouter.use('/messages', MessageRouter);
 ApiRouter.use('/users', UsersRouter);
+ApiRouter.use('/admin', AdminRouter);
+
 // ApiRouter.use('/subjects', SubjectRouter);
 // ApiRouter.use('/specialties', SpecialtiesRouter);
 // ApiRouter.use('/courses', CoursesRouter);

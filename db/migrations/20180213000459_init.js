@@ -23,7 +23,8 @@ exports.up = function (knex) {
         .string("email")
         .notNullable()
         .unique();
-      table.string("password");
+      table
+        .string("password");
       table
         .bigInteger("workspace_id")
         .notNullable()

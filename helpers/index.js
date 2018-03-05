@@ -1,3 +1,3 @@
 module.exports = {
-    AccessTokenHelper: require('./AccesToken.helper')
+    InviteRulesHelper: require('./invitesRules.helper')
 }
