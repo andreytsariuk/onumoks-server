@@ -6,7 +6,6 @@ module.exports = (req, res, next) => {
     if (!req.decoded) {
         return next(new Error('unauthorised'))
     } else {
-        console.log('req.decoded', req.decoded.id)
         return new Users({
             id: req.decoded.user.id
         })

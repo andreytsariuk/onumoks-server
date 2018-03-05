@@ -20,12 +20,13 @@ module.exports = class EmailService {
 
     static sendInvite(userName, token, email, workspace) {
         // The HTML body of the email.
-
+        console.log('sdsssssss', `${config.get('Web.Url')}/invite?token=${token}`)
         return EmailService
             .readEmail('invite', {
                 userName: userName ? userName : email,
                 workspace: workspace.name,
-                signUpUrl: `${config.get('Web.Url')}/invite?token=${token}`,
+                signUpUrl: `${config.get('Web.Url')}/${workspace.name}/invite?token=${token}`,
+                pathToWorkspace: '',
                 serverUrl: config.get('Server.Url')
             })
             .then(body_html => ({
@@ -33,7 +34,8 @@ module.exports = class EmailService {
                 to: email,
                 subject: "inStudy User Invite",
                 html: body_html
-            }))
+            })
+            )
             .then(params => transporter.sendMail(params))
             .then(res => new Emails({
                 workspace_id: workspace.id,

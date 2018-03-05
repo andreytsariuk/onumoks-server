@@ -23,8 +23,7 @@ module.exports = class {
      * @param {*} next 
      */
     static create(req, res, next) {
-        console.log('req.user\n', req.user.toJSON())
-        console.log('req.workspace\n', req.workspace.toJSON())
+
 
 
         return RequireFilter
