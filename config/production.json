@@ -42,8 +42,7 @@
         },
         "seeds": {
             "directory": "./db/seeds"
-        },
-        "ssl": true
+        }
     },
     "Console": {
         "CreaateUSer": "create user moks createdb createuser password 'moks';",
