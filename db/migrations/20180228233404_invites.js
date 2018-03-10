@@ -14,6 +14,8 @@ exports.up = function (knex, Promise) {
             table.string('name');
             table.string('email').notNullable();
             table.string('token').notNullable().unique();
+            table.boolean('used').defaultTo(false).notNullable();
+            table.timestamp('expires_at').notNullable();
             table.bigInteger('user_id').references('users.id').onDelete('CASCADE');
             table.json('rules');
             table.timestamp('created_at').defaultTo(knex.fn.now()).notNullable();

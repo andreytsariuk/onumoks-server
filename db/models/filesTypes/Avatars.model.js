@@ -22,9 +22,6 @@ module.exports = Bookshelf.model('Avatars', Bookshelf.Model.extend({
         this.attributes.code;
         return this;
     },
-    profile() {
-        return this.belongsTo('Profiles');
-    },
     files() {
         return this.morphOne('Files', 'file');
     },

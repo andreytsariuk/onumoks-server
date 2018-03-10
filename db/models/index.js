@@ -5,7 +5,8 @@ module.exports = {
     Workspaces: require('./Workspaces.model'),
     Invites: require('./Invites.model'),
     Tokens: require('./Tokens.model'),
-    Emails: require('./Emails.model')
+    Emails: require('./Emails.model'),
+    Profiles: require('./Profiles.model')
     // Subject: require('./subject.model'),
     // Books: require('./book.model'),
     // Specialties: require('./Specialties.model'),

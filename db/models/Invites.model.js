@@ -1,5 +1,8 @@
 const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
+const Users = require('./Users.model');
+const Workspaces = require('./Workspaces.model');
+
 const suid = require('rand-token').suid;
 const moment = require('moment');
 const promise = require('bluebird');
@@ -23,15 +26,16 @@ module.exports = Bookshelf.model('Invites', Bookshelf.Model.extend({
         return collection;
     },
     user: function () {
-        const Users = require('./Users.model');
-
         return this.belongsTo('Users');
     },
-    validate(params = { useExpires: true }) {
+    workspace: function () {
+        return this.belongsTo('Workspaces');
+    },
+    validate(params = { expired: true }) {
         //check For Errors;
         return new Promise((resolve, reject) => {
             switch (true) {
-                case moment(this.get('expires_at')) < moment() && params.useExpires:
+                case moment(this.get('expires_at')) < moment() && params.expired:
                     return reject(new Error('invite_expired'));
 
                 case this.get('used'):
@@ -42,13 +46,14 @@ module.exports = Bookshelf.model('Invites', Bookshelf.Model.extend({
             }
         });
     },
-    markAsUsed(email) {
+    markAsUsed(email, user) {
         return this.where({
             email
         })
             .fetchAll()
             .then(result => Promise.map(result.models, model => model.save({
-                used: true
+                used: true,
+                user_id: user.id
             }, { method: 'update' })))
     }
 

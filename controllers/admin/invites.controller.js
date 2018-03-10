@@ -13,7 +13,6 @@ const requireFields = {
     List: ['page', 'rowsPerPage']
 }
 
-
 module.exports = class {
 
     /**
@@ -48,6 +47,7 @@ module.exports = class {
                 workspace_id: req.workspace.id,
                 name: req.body.name ? req.body.name : '-',
                 rules: JSON.stringify(req.body.rules),
+                expires_at: moment().add(24, 'hours').toISOString()
             }).save())
             .tap(invite => EmailService.sendInvite(invite.get('name'), invite.get('token'), invite.get('email'), req.workspace.toJSON()))
             .tap(invite => res.status(201).send(invite))

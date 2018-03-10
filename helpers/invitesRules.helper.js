@@ -44,10 +44,7 @@ module.exports = class InviteRulesHelper {
                         reject(new Error('not_valid_invite_rules'));
                 })
             )
-            .then(() => ({
-                valid: true,
-                rulesObject
-            }));
+            .then(() => rulesObject);
     }
 
 

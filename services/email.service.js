@@ -25,7 +25,7 @@ module.exports = class EmailService {
             .readEmail('invite', {
                 userName: userName ? userName : email,
                 workspace: workspace.name,
-                signUpUrl: `${config.get('Web.Url')}/${workspace.name}/invite?token=${token}`,
+                signUpUrl: `${config.get('Web.Url')}/${workspace.name}/sign-up/invite?token=${token}`,
                 pathToWorkspace: '',
                 serverUrl: config.get('Server.Url')
             })
