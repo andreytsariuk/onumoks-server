@@ -1,4 +1,11 @@
 {
+    "Emails": {
+        "Support": "instudy@support.com",
+        "SendGrid": {
+            "api_user": "app89420008@heroku.com",
+            "api_key": "ttaak8xc6137"
+        }
+    },
     "Customer": {
         "dbConfig": {
             "host": "prod-db-server"
@@ -6,6 +13,9 @@
         "credit": {
             "initialDays": 30
         }
+    },
+    "Web": {
+        "Url": "https://instudy-web.herokuapp.com"
     },
     "Server": {
         "Url": "https://instudy-backend.herokuapp.com",
@@ -47,5 +57,8 @@
     "Console": {
         "CreaateUSer": "create user moks createdb createuser password 'moks';",
         "CretareDb": " create database moks owner moks;"
+    },
+    "EmailTypes": {
+        "invite": "invite"
     }
 }
