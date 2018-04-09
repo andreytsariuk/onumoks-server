@@ -146,8 +146,8 @@ module.exports = class {
     }
 
     static Get(req, res) {
-        console.log('req.User', req.User.id)
-        return res.status(200).send(req.User);
+        console.log('req.User', req.requestedUser.id)
+        return res.status(200).send(req.requestedUser);
 
     }
     static Registration(req, res) {

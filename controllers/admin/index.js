@@ -1,3 +1,9 @@
 module.exports = {
-    Inviites: require('./invites.controller')
+    Inviites: require('./invites.controller'),
+    Users: require('./user.controller'),
+    UsersProfiles: require('./user.profile.controller'),
+    Files: require('./files.controller'),
+    Specialties: require('./specialties.controller'),
+    Students: require('./students.controller'),
+    Courses: require('./cources.controller')
 }

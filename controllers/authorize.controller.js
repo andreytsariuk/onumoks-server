@@ -13,7 +13,8 @@ const Errors = require('../errors');
 const Promise = require('bluebird');
 const Bookshelf = require('../config/bookshelf');
 const knex = Bookshelf.knex;
-const { InviteRulesHelper } = require('../helpers')
+const { InviteRulesHelper } = require('../helpers');
+
 
 module.exports = class {
 

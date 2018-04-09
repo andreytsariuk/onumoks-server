@@ -7,7 +7,7 @@ const Promise = require('bluebird');
 const Users = require('../Users.model');
 
 
-module.exports = Bookshelf.model('Book', Bookshelf.Model.extend({
+module.exports = Bookshelf.model('Books', Bookshelf.Model.extend({
     tableName: 'books',
     owner: function () {
         return this.hasOne('Users');

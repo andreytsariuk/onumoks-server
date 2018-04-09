@@ -8,11 +8,7 @@ const Users = require('../Users.model');
 module.exports = Bookshelf.model('Admins', Bookshelf.Model.extend({
     tableName: 'admins',
     user: function () {
-        return this
-            .refresh({
-                withRelated: ['role', 'role.user']
-            })
-            .then(role => role.related('user'))
+        return this.belongsTo('Users');
     },
     role() {
         return this.morphOne('Roles', 'role');
