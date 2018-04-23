@@ -8,6 +8,9 @@ exports.up = function (knex) {
                 .string("title")
                 .notNullable()
             table
+                .string("description")
+                .notNullable()
+            table
                 .integer("level")
                 .notNullable()
             table

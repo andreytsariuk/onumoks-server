@@ -13,7 +13,6 @@ module.exports = function authorize(req, res, next) {
     if (token) {
         // verifies secret and checks exp
         jwt.verify(token, config.get('secret'), function (err, decoded) {
-            console.log('err', token)
             if (err) {
                 res.status(401).send('Unauthorize: Token is invalid');
             } else {

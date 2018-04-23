@@ -9,8 +9,8 @@ const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
 const requireFields = {
     Post: ['email', 'role', 'fname', 'lname'],
-    createNew: ['email', 'fname', 'lname', 'specialty_id', 'course_id'],
-    createExist: ['user_id', 'specialty_id', 'course_id'],
+    createNew: ['email', 'fname', 'lname', 'position_id'],
+    createExist: ['user_id', 'position_id'],
     Het: ['id'],
     List: ['page', 'rowsPerPage']
 }
@@ -26,13 +26,13 @@ module.exports = class {
     static List(req, res, next) {
         return RequireFilter
             .Check(req.query, requireFields.List)
-            .then(validated => new RolesTypes.Students()
+            .then(validated => new RolesTypes.Lectors()
                 .orderBy('created_at', 'DESC')
                 .fetchPage({
                     workspace_id: req.workspace.id,
                     pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
                     page: validated.page, // Defaults to 1 if not specified
-                    withRelated: ['user', 'user.roles', 'user.profile.avatar', 'specialty', 'course']
+                    withRelated: ['user', 'user.roles', 'user.profile.avatar', 'position']
                 }))
             .then(result => {
                 return res.status(200).send({
@@ -64,17 +64,16 @@ module.exports = class {
                 lname: req.body.lname
             }))
             .then(newUser => new RolesTypes
-                .Students({
+                .Lectors({
                     workspace_id: req.workspace.id,
                     user_id: newUser.id,
-                    specialty_id: req.body.specialty_id,
-                    course_id: req.body.course_id
+                    position_id: req.body.position_id
                 }).save()
             )
-            .then(newStuden => new Roles({
-                user_id: newStuden.get('user_id'),
-                role_id: newStuden.id,
-                role_type: 'students'
+            .then(newLector => new Roles({
+                user_id: newLector.get('user_id'),
+                role_id: newLector.id,
+                role_type: 'lectors'
             }).save())
             .then(newRole => res.status(201).send(newRole))
             .catch(next);
@@ -92,17 +91,16 @@ module.exports = class {
         return RequireFilter
             .Check(req.body, requireFields.createExist)
             .then(validated => new RolesTypes
-                .Students({
+                .Lectors({
                     workspace_id: req.workspace.id,
                     user_id: validated.user_id,
-                    specialty_id: validated.specialty_id,
-                    course_id: validated.course_id
+                    position_id: req.body.position_id
                 }).save()
             )
-            .then(newStuden => new Roles({
+            .then(newLector => new Roles({
                 user_id: req.body.user_id,
-                role_id: newStuden.id,
-                role_type: 'students'
+                role_id: newLector.id,
+                role_type: 'lectors'
             }).save())
             .then(newRole => res.status(201).send(newRole))
             .catch(next);
@@ -117,11 +115,11 @@ module.exports = class {
      * @param {*} res 
      */
     static Get(req, res, next) {
-        return req.requestedUser
+        return req.requestedLector
             .refresh({
-                withRelated: ['user.profile', 'user.roles', 'user.profile.avatar']
+                withRelated: ['user', 'user.roles', 'user.profile.avatar']
             })
-            .then(user => res.status(200).send(user))
+            .then(lector => res.status(200).send(lector))
             .catch(next);
     }
 

@@ -2,7 +2,6 @@ const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
 const Users = require('./Users.model');
 const Workspaces = require('./Workspaces.model');
-
 const suid = require('rand-token').suid;
 const moment = require('moment');
 const promise = require('bluebird');

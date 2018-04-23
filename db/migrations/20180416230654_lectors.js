@@ -3,11 +3,11 @@ const Promise = require('bluebird');
 
 exports.up = function (knex, Promise) {
     //Users Table
-    return knex.schema.table('students', function (table) {
+    return knex.schema.table('lectors', function (table) {
         table.bigInteger('workspace_id').references('workspaces.id').onDelete('CASCADE');
         table.bigInteger('user_id').references('users.id').onDelete('CASCADE');
-        table.bigInteger('course_id').references('courses.id').onDelete('CASCADE');
-        table.bigInteger('specialty_id').references('specialties.id').onDelete('CASCADE');
+        table.bigInteger('position_id').references('positions.id').onDelete('CASCADE');
+
         table
             .timestamp("created_at")
             .defaultTo(knex.fn.now())
@@ -21,11 +21,10 @@ exports.up = function (knex, Promise) {
 };
 
 exports.down = function (knex, Promise) {
-    return knex.schema.table('students', function (table) {
+    return knex.schema.table('lectors', function (table) {
         table.dropColumn('workspace_id');
         table.dropColumn('user_id');
-        table.dropColumn('course_id');
-        table.dropColumn('specialty_id');
+        table.dropColumn('position_id');
         table.dropColumn('created_at');
         table.dropColumn('updated_at');
 

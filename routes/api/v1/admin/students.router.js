@@ -7,6 +7,10 @@ const StudentRouter = Router();
 
 
 StudentRouter.get('/', AdminController.Students.List);
+StudentRouter.post('/new', AdminController.Students.createNew);
+StudentRouter.post('/exist', AdminController.Students.createExist);
+
+
 
 
 StudentRouter.param('student_id', function (req, res, next, student_id) {

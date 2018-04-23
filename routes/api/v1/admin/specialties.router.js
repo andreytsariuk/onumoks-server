@@ -7,6 +7,7 @@ const SpecialtyRouter = Router();
 
 
 SpecialtyRouter.get('/', AdminController.Specialties.List);
+SpecialtyRouter.post('/', AdminController.Specialties.Post);
 
 
 SpecialtyRouter.param('specialty_id', function (req, res, next, specialty_id) {
@@ -16,7 +17,6 @@ SpecialtyRouter.param('specialty_id', function (req, res, next, specialty_id) {
         .then(() => next())
         .catch(next);
 });
-
 
 SpecialtyRouter.put('/:specialty_id', AdminController.Specialties.Put);
 SpecialtyRouter.get('/:specialty_id', AdminController.Specialties.Get);

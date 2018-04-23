@@ -7,6 +7,7 @@ const CoursesRouter = Router();
 
 
 CoursesRouter.get('/', AdminController.Courses.List);
+CoursesRouter.post('/', AdminController.Courses.Post);
 
 
 CoursesRouter.param('course_id', function (req, res, next, course_id) {

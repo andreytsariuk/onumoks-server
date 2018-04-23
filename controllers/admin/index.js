@@ -5,5 +5,7 @@ module.exports = {
     Files: require('./files.controller'),
     Specialties: require('./specialties.controller'),
     Students: require('./students.controller'),
-    Courses: require('./cources.controller')
+    Lectors: require('./lectors.controller'),
+    Courses: require('./cources.controller'),
+    Positions: require('./positions.controller')
 }

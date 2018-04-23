@@ -30,7 +30,10 @@ module.exports = Bookshelf.model('Avatars', Bookshelf.Model.extend({
     },
     virtuals: {
         publicPath: function () {
-            return (`${config.get('Server.Url')}/images/avatars/${this.get('name')}`);
+            if (this.get('name'))
+                return (`${config.get('Server.Url')}/images/avatars/${this.get('name')}`);
+            else
+                return undefined;
         }
     }
 }));

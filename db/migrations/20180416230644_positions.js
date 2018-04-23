@@ -2,23 +2,20 @@
 
 exports.up = function (knex) {
     return knex.schema
-        .createTable("specialties", function (table) {
+        .createTable("positions", function (table) {
             table.increments("id").primary();
             table
                 .string("name")
-                .notNullable()
-                .unique();
+                .notNullable();
             table
                 .string("title")
-                .notNullable()
+                .notNullable();
             table
                 .string("description")
-                .notNullable()
+                .notNullable();
             table
-                .string("code")
-                .notNullable()
-                .unique();
-
+                .integer("hours_count")
+                .defaultTo(0)
             table
                 .bigInteger("workspace_id")
                 .notNullable()
@@ -38,6 +35,6 @@ exports.up = function (knex) {
 
 exports.down = function (knex) {
     return knex.schema
-        .dropTable("specialties")
+        .dropTable("positions")
 
 };

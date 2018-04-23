@@ -3,7 +3,11 @@ let { Server, User } = require('../errors');
 
 
 module.exports = function ErrorsMiddleware(error, req, res, next) {
-    console.log('error', error);
+    console.log('==================================ERROR MIDDLEWARE==================================');
+    console.log('-------------MESSAGE-------------:\n', error.message);
+    console.log('--------------ERROR--------------:\n', error);
+    console.log('==================================END ERROR MIDDLEWARE==================================');
+
 
     switch (true) {
         //------------------------Authorization Section------------------
@@ -15,6 +19,11 @@ module.exports = function ErrorsMiddleware(error, req, res, next) {
         //---------------------Server Section------------------
         case error instanceof Server.Conflict:
             return error.run(res);
+        case error.code === '23505':
+            res.status(409).send({
+                code: error.constraint,
+                description: `The same ${String(error.table).slice(0, error.table.length - 1)} already exist`
+            })
         case error instanceof Server.Conflict:
             return error.run(res);
         case error instanceof Server.FileDoesNotExist:

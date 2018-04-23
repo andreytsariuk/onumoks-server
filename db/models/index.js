@@ -11,6 +11,7 @@ module.exports = {
     Files: require('./Files.model'),
     Specialties: require('./Specialties.model'),
     Courses: require('./Courses.model'),
+    Positions: require('./Positions.model')
 
     // Subject: require('./subject.model'),
     // Books: require('./book.model'),

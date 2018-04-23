@@ -3,6 +3,7 @@ const knex = Bookshelf.knex;
 const Promise = require('bluebird');
 const Roles = require('../Roles.model');
 const Users = require('../Users.model');
+const Positions = require('../Positions.model');
 
 
 module.exports = Bookshelf.model('Lectors', Bookshelf.Model.extend({
@@ -12,6 +13,9 @@ module.exports = Bookshelf.model('Lectors', Bookshelf.Model.extend({
     },
     role() {
         return this.morphOne('Roles', 'role');
+    },
+    position() {
+        return this.belongsTo('Positions');
     }
 
 }));
