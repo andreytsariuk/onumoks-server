@@ -21,7 +21,6 @@ module.exports = Bookshelf.model('Students', Bookshelf.Model.extend({
     },
     course() {
         return this.belongsTo('Courses');
-
     }
 
 }));

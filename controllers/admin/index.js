@@ -6,6 +6,10 @@ module.exports = {
     Specialties: require('./specialties.controller'),
     Students: require('./students.controller'),
     Lectors: require('./lectors.controller'),
-    Courses: require('./cources.controller'),
-    Positions: require('./positions.controller')
+    Courses: require('./courses.controller'),
+    Positions: require('./positions.controller'),
+    Subjects: require('./subjects.controller'),
+    LessonTypes: require('./lessonTypes.controller'),
+    Threads: require('./threads.controller'),
+    Groups: require('./groups.controller')
 }

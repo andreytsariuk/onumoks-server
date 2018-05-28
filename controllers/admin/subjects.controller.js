@@ -1,6 +1,6 @@
 const { RequireFilter } = require('../../filters');
 const md5 = require('md5');
-const { Positions } = require('../../db/models');
+const { Subjects } = require('../../db/models');
 const Errors = require('../../errors');
 const _ = require('lodash');
 const Promise = require('bluebird');
@@ -8,14 +8,15 @@ const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
 const requireFields = {
     Post: ['name', 'title'],
-    Het: ['id'],
-    List: ['page', 'rowsPerPage']
+    Get: ['id'],
+    List: ['page', 'rowsPerPage'],
+    Put: ['name', 'title']
 }
 
 module.exports = class {
 
     /**
-     * Function will return all Specialties with paggination
+     * Function will return all Subjects with paggination
      * @param {*} req 
      * @param {*} res 
      * @param {*} next 
@@ -25,7 +26,7 @@ module.exports = class {
 
         return RequireFilter
             .Check(req.query, requireFields.List)
-            .then(validated => new Positions()
+            .then(validated => new Subjects()
                 .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
                 .fetchPage({
                     workspace_id: req.workspace.id,
@@ -41,7 +42,7 @@ module.exports = class {
     }
 
     /**
-    * Will create new Specialty
+    * Will create new Subject
     * @param {*} req 
     * @param {*} res 
     * @param {*} next 
@@ -49,35 +50,45 @@ module.exports = class {
     static Post(req, res, next) {
         return RequireFilter
             .Check(req.body, requireFields.Post)
-            .then(validated => new Positions({
+            .then(validated => new Subjects({
                 workspace_id: req.workspace.id,
                 name: validated.name,
                 title: validated.title,
-                description: validated.description,
-                hours_count: validated.hours_count
+                description: validated.description
             }).save())
-            .then(newPosition => res.status(201).send(newPosition))
+            .then(newSubject => res.status(201).send(newSubject))
             .catch(next);
     }
 
     /**
-     * get current position
+     * get current user
      * @param {*} req 
      * @param {*} res 
      */
     static Get(req, res, next) {
-        return res.status(200).send(req.requestedPosition);
+        return res.status(200).send(req.requestedSubject);
     }
 
+
     /**
-     * Update current User
+     * Will Update current Subject
      * @param {*} req 
      * @param {*} res 
      * @param {*} next 
      */
     static Put(req, res, next) {
-
+        return RequireFilter
+            .Check(req.body, requireFields.Put)
+            .then(validated => req.requestedSubject.save({
+                name: validated.name,
+                title: validated.title,
+                description: validated.description
+            }))
+            .then(newSubject => res.status(200).send(newSubject))
+            .catch(next);
     }
+
+
     /**
      * Delete Current User
      * @param {*} req 
@@ -85,7 +96,24 @@ module.exports = class {
      * @param {*} next 
      */
     static Delete(req, res, next) {
+        return req.requestedSubject
+            .destroy()
+            .then(() => res.status(200).send({
+                code: 'subject_deleted'
+            }))
+            .catch(next);
+    }
 
+    static MultiDelete(req, res, next) {
+        const { subjects_ids } = req.query;
+        return new Subjects()
+            .query(qb => qb.whereIn('id', subjects_ids))
+            .fetchAll(result => Promise
+                .map(result.models, model => model.destroy()))
+            .then(() => res.status(200).send({
+                code: 'subjects_deleted'
+            }))
+            .catch(next);
     }
 
 

@@ -7,7 +7,7 @@ module.exports = {
     SpecialtiesController: require('./Specialties.controller'),
     CoursesController: require('./Courses.controller'),
     WorkspaceController: require('./workspaces.controller'),
-    PublicController: require('./public')
+    PublicController: require('./public'),
 
 
 }

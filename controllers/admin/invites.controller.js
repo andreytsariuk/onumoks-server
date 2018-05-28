@@ -90,13 +90,15 @@ module.exports = class {
      * @param {*} next 
      */
     static list(req, res, next) {
+        const { descending, sortBy } = req.query;
+
         return RequireFilter
             .Check(req.query, requireFields.List)
             .then(validated => new Invites()
                 .where({
                     workspace_id: req.workspace.id
                 })
-                .orderBy('created_at', 'DESC')
+                .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
                 .fetchPage({
                     pageSize: validated.rowsPerPage,
                     page: validated.page,

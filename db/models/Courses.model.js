@@ -10,5 +10,8 @@ module.exports = Bookshelf.model('Courses', Bookshelf.Model.extend({
     specialty: function () {
         return this.belongsTo('Specialties');
     },
+    students: function () {
+        return this.hasMany('Students');
+    }
 
 }));

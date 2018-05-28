@@ -17,10 +17,12 @@ module.exports = class {
      * @param {*} next 
      */
     static List(req, res, next) {
+        const { descending, sortBy } = req.query;
+
         return RequireFilter
             .Check(req.query, requireFields.List)
             .then(validated => new Files()
-                .orderBy('created_at', 'DESC')
+                .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
                 .fetchPage({
                     workspace_id: req.workspace.id,
                     pageSize: validated.rowsPerPage, // Defaults to 10 if not specified

@@ -9,4 +9,7 @@ bookshelf
     .plugin('pagination')
     .plugin(require('bookshelf-soft-delete'));
 
+
+
+
 module.exports = bookshelf;
