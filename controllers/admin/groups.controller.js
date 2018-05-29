@@ -1,5 +1,3 @@
-const { RequireFilter } = require('../../filters');
-const md5 = require('md5');
 const { Groups, RolesTypes, Courses } = require('../../db/models');
 const Errors = require('../../errors');
 const _ = require('lodash');
@@ -11,8 +9,43 @@ const requireFields = {
     Het: ['id'],
     List: ['page', 'rowsPerPage']
 }
+const Joi = require('joi');
 
 module.exports = class {
+
+
+    /**
+     * Main Schema for all functions
+     */
+    static get Schema() {
+        return {
+            Create: {
+                body: Joi.object().keys({
+                    title: Joi.string().required(),
+                    description: Joi.string().required(),
+
+                    students_ids: Joi.array().items(Joi.number().integer()).required(),
+                    course_id: Joi.number().integer().required(),
+                })
+            },
+            Get: {
+                query: Joi.object().keys({
+                    id: Joi.number().integer().required(),
+                })
+            },
+            List: {
+                query: Joi.object().keys({
+                    page: Joi.number().integer(),
+                    rowsPerPage: Joi.number().integer(),
+                    descending: Joi.boolean(),
+                    sortBy: Joi.string(),
+                    totalItems: Joi.number().integer(),
+                    search: Joi.string().empty(''),
+                    course: Joi.number().integer(),
+                })
+            }
+        };
+    }
 
     /**
      * Function will return all Groups with paggination
@@ -21,18 +54,24 @@ module.exports = class {
      * @param {*} next 
      */
     static List(req, res, next) {
-        const { descending, sortBy } = req.query;
+        const { descending, sortBy, rowsPerPage, page, search, course } = req.query;
 
-        return RequireFilter
-            .Check(req.query, requireFields.List)
-            .then(validated => new Groups()
-                .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
-                .fetchPage({
-                    workspace_id: req.workspace.id,
-                    pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
-                    page: validated.page, // Defaults to 1 if not specified
-                    withRelated: ['cource', 'cource.specialty', 'students']
-                }))
+        return new Groups()
+            .query(qb => {
+                if (search) {
+                    qb.orWhereRaw(`LOWER(title) LIKE ?`, [`%${_.toLower(search)}%`])
+                }
+                if (course)
+                    qb.where('course_id', course);
+
+            })
+            .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
+            .fetchPage({
+                workspace_id: req.workspace.id,
+                pageSize: rowsPerPage, // Defaults to 10 if not specified
+                page,// Defaults to 1 if not specified
+                withRelated: ['course', 'course.specialty', 'students']
+            })
             .then(result => res.status(200)
                 .send({
                     items: result.toJSON(),
@@ -48,17 +87,16 @@ module.exports = class {
     * @param {*} next 
     */
     static Post(req, res, next) {
-        return RequireFilter
-            .Check(req.body, requireFields.Post)
-            .then(validated => new Groups({
-                workspace_id: req.workspace.id,
-                cource_id: req.body.cource_id,
-                title: validated.title,
-                description: validated.description
-            }).save())
+        return new Groups({
+            workspace_id: req.workspace.id,
+            course_id: req.body.course_id,
+            title: req.body.title,
+            description: req.body.description
+        })
+            .save()
             .tap(newGroup => {
-                if (req.body.students)
-                    return newGroup.students().attach(req.body.students);
+                if (req.body.students_ids)
+                    return newGroup.students().attach(req.body.students_ids);
                 else
                     return Promise.resolve();
             })

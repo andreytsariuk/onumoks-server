@@ -31,7 +31,7 @@ module.exports = class {
                     workspace_id: req.workspace.id,
                     pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
                     page: validated.page, // Defaults to 1 if not specified
-                    withRelated: ['specialty']
+                    withRelated: ['specialty', 'students', 'students.user']
                 }))
             .then(result => Promise
                 .map(result.models, model => Promise

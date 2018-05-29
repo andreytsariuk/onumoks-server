@@ -7,6 +7,7 @@ const Roles = require('./Roles.model');
 const Profiles = require('./Profiles.model');
 const Workspaces = require('./Workspaces.model')
 
+
 module.exports = Bookshelf.model('Users', Bookshelf.Model.extend({
     tableName: 'users',
     hidden: ['password'],

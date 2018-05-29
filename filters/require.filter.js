@@ -3,29 +3,17 @@ const Promise = require('bluebird');
 const { Conflict } = require('../errors').Server;
 
 module.exports = class {
-    static Check(object, requiredFields) {
-        return new Promise((resolve, reject) => {
-            if (!object)
-                throw new Conflict();
-            if (!requiredFields)
-                throw new Conflict();
-            let allFieldsExists = object;
+    static Check(req, schema) {
 
-            requiredFields.forEach((field) => {
-                let getedField = _.get(object, field);
-                if (!getedField) {
-                    allFieldsExists = false;
-                }
-            });
+        if (!req)
+            throw new Conflict();
+        if (!schema)
+            throw new Conflict();
 
-            if (!allFieldsExists) {
-                throw new Conflict();
-            }
-            
-            return resolve(allFieldsExists);
-        })
-
-
-
+        return Promise
+            .map(schema, (value, key) => req[key] && schema[key] ?
+                Promise.fromCallback(cb => Joi.validate(req[key], schema[key], cb)) :
+                Promise.resolve()
+            );
     }
 }

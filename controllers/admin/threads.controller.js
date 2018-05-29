@@ -1,18 +1,48 @@
-const { RequireFilter } = require('../../filters');
-const md5 = require('md5');
 const { Threads, RolesTypes, Courses } = require('../../db/models');
 const Errors = require('../../errors');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
-const requireFields = {
-    Post: ['title'],
-    Het: ['id'],
-    List: ['page', 'rowsPerPage']
-}
+const Joi = require('joi');
+
 
 module.exports = class {
+
+
+    /**
+     * Main Schema for all functions
+     */
+    static get Schema() {
+        return {
+            Create: {
+                body: Joi.object().keys({
+                    title: Joi.string().required(),
+                    description: Joi.string().required(),
+
+                    students_ids: Joi.array().items(Joi.number().integer()).empty(undefined).empty(null),
+                    courses_ids: Joi.array().items(Joi.number().integer()).empty(undefined).empty(null),
+                    groups_ids: Joi.array().items(Joi.number().integer()).empty(undefined).empty(null),
+                })
+            },
+            Get: {
+                query: Joi.object().keys({
+                    id: Joi.number().integer().required(),
+                })
+            },
+            List: {
+                query: Joi.object().keys({
+                    page: Joi.number().integer(),
+                    rowsPerPage: Joi.number().integer(),
+                    descending: Joi.boolean(),
+                    sortBy: Joi.string(),
+                    totalItems: Joi.number().integer(),
+                    search: Joi.string().empty(''),
+                    course: Joi.number().integer(),
+                })
+            }
+        };
+    }
 
     /**
      * Function will return all Threads with paggination
@@ -21,18 +51,23 @@ module.exports = class {
      * @param {*} next 
      */
     static List(req, res, next) {
-        const { descending, sortBy } = req.query;
+        const { descending, sortBy, rowsPerPage, page, search, course } = req.query;
 
-        return RequireFilter
-            .Check(req.query, requireFields.List)
-            .then(validated => new Threads()
-                .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
-                .fetchPage({
-                    workspace_id: req.workspace.id,
-                    pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
-                    page: validated.page, // Defaults to 1 if not specified
-                    withRelated: ['cources', 'groups', 'students']
-                }))
+        new Threads()
+            .query(qb => {
+                if (search) {
+                    qb.orWhereRaw(`LOWER(title) LIKE ?`, [`%${_.toLower(search)}%`])
+                }
+                if (course)
+                    qb.where('course_id', course);
+            })
+            .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
+            .fetchPage({
+                workspace_id: req.workspace.id,
+                pageSize: rowsPerPage, // Defaults to 10 if not specified
+                page, // Defaults to 1 if not specified
+                withRelated: ['courses', 'groups', 'students']
+            })
             .then(result => res.status(200)
                 .send({
                     items: result.toJSON(),
@@ -48,28 +83,27 @@ module.exports = class {
     * @param {*} next 
     */
     static Post(req, res, next) {
-        return RequireFilter
-            .Check(req.body, requireFields.Post)
-            .then(validated => new Threads({
-                workspace_id: req.workspace.id,
-                title: validated.title,
-                description: validated.description
-            }).save())
+        return new Threads({
+            workspace_id: req.workspace.id,
+            title: req.body.title,
+            description: req.body.description
+        })
+            .save()
             .tap(newThread => {
-                if (req.body.courses)
-                    return newThread.courses().attach(req.body.courses);
+                if (req.body.courses_ids)
+                    return newThread.courses().attach(req.body.courses_ids);
                 else
                     return Promise.resolve();
             })
             .tap(newThread => {
-                if (req.body.groups)
-                    return newThread.groups().attach(req.body.groups);
+                if (req.body.groups_ids)
+                    return newThread.groups().attach(req.body.groups_ids);
                 else
                     return Promise.resolve();
             })
             .tap(newThread => {
-                if (req.body.students)
-                    return newThread.students().attach(req.body.students);
+                if (req.body.students_ids)
+                    return newThread.students().attach(req.body.students_ids);
                 else
                     return Promise.resolve();
             })
@@ -84,7 +118,7 @@ module.exports = class {
      */
     static Get(req, res, next) {
         return req.requestedThread
-            .refresh({ withRelated: ['cources', 'groups', 'students'] })
+            .refresh({ withRelated: ['courses', 'groups', 'students'] })
             .then(thread => res.status(200).send(thread))
             .catch(next);
     }

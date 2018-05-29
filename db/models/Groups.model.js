@@ -2,6 +2,7 @@ const Bookshelf = require('../../config/bookshelf');
 const Courses = require('./Courses.model');
 const { Students } = require('./rolesTypes');
 const Workspaces = require('./Workspaces.model');
+const { GroupsStudents } = require('./groups');
 
 module.exports = Bookshelf.model('Groups', Bookshelf.Model.extend({
     tableName: 'groups',
@@ -10,14 +11,14 @@ module.exports = Bookshelf.model('Groups', Bookshelf.Model.extend({
         return this.belongsTo('Courses');
     },
     students() {
-        return this.belongsTo('Students');
+        return this.belongsToMany('Students').through('GroupsStudents');
     },
     workspace() {
         return this.belongsTo('Workspaces');
     },
     virtuals: {
         students_count: function () {
-            this.related('students').length;
+            return this.related('students').length;
         }
     }
 

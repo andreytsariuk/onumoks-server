@@ -29,6 +29,11 @@ module.exports = function ErrorsMiddleware(error, req, res, next) {
         case error instanceof Server.FileDoesNotExist:
             return error.run(res);
 
+        case error.isJoi:
+            return res.status(409).send({
+                code: 'validation_failed',
+                description: error.details[0].message
+            })
         //------------------------User Section------------------
         case error instanceof User.EmailExist:
             return error.run(res);

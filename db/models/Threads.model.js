@@ -3,33 +3,33 @@ const Workspaces = require('./Workspaces.model');
 const Groups = require('./Groups.model');
 const Courses = require('./Courses.model');
 const { Students } = require('./rolesTypes');
-
+const { ThreadsCourses, ThreadsGroups, ThreadsStudents } = require('./threads');
 
 
 module.exports = Bookshelf.model('Threads', Bookshelf.Model.extend({
     tableName: 'threads',
     hasTimestamps: true,
-    course: function () {
-        return this.hasMany('Courses');
+    courses: function () {
+        return this.belongsToMany('Courses').through('ThreadsCourses');
     },
     groups: function () {
-        return this.hasMany('Groups');
+        return this.belongsToMany('Groups').through('ThreadsGroups');
     },
     students() {
-        return this.hasMany('Students');
+        return this.belongsToMany('Students').through('ThreadsStudents');
     },
     workspace() {
         return this.belongsTo('Workspaces');
     },
     virtuals: {
         students_count: function () {
-            this.related('students').length;
+            return this.related('students').length;
         },
         groups_count: function () {
-            this.related('groups').length;
+            return this.related('groups').length;
         },
         courses_count: function () {
-            this.related('course').length;
+            return this.related('courses').length;
         }
     }
 

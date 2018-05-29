@@ -7,12 +7,37 @@ const Promise = require('bluebird');
 const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
 const requireFields = {
-    Post: ['email', 'role', 'fname', 'lname'],
-    Het: ['id'],
     List: ['page', 'rowsPerPage']
 }
 
 module.exports = class {
+
+
+
+    /**
+ * Main Schema for all functions
+ */
+    static get Schema() {
+        return {
+            Get: {
+                query: Joi.object().keys({
+                    id: Joi.number().integer().required(),
+                })
+            },
+            List: {
+                query: Joi.object().keys({
+                    page: Joi.number().integer(),
+                    rowsPerPage: Joi.number().integer(),
+                    descending: Joi.boolean(),
+                    sortBy: Joi.string(),
+                    totalItems: Joi.number().integer(),
+                    search: Joi.string().empty('')
+                })
+            }
+        };
+    }
+
+
 
     /**
      * Function will return all users with paggination
@@ -23,16 +48,23 @@ module.exports = class {
     static List(req, res, next) {
         const { descending, sortBy } = req.query;
 
-        return RequireFilter
-            .Check(req.query, requireFields.List)
-            .then(validated => new Users()
-                .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
-                .fetchPage({
-                    workspace_id: req.workspace.id,
-                    pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
-                    page: validated.page, // Defaults to 1 if not specified
-                    withRelated: ['roles', 'profile', 'profile.avatar']
-                }))
+        return new Users()
+            .query(qb => {
+                qb.select('*').from('users');
+                qb.leftOuterJoin('profiles', 'profiles.id', 'users.id')
+                if (search) {
+                    qb.orWhereRaw(`LOWER(email) LIKE ?`, [`%${_.toLower(search)}%`]);
+                    qb.orWhereRaw(`LOWER(fname) LIKE ?`, [`%${_.toLower(search)}%`]);
+                    qb.orWhereRaw(`LOWER(lname) LIKE ?`, [`%${_.toLower(search)}%`]);
+                }
+            })
+            .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
+            .fetchPage({
+                workspace_id: req.workspace.id,
+                pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
+                page: validated.page, // Defaults to 1 if not specified
+                withRelated: ['roles', 'profile', 'profile.avatar']
+            })
             .then(result => {
 
                 return res.status(200).send({

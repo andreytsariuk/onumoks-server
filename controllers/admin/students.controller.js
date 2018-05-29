@@ -7,15 +7,51 @@ const _ = require('lodash');
 const Promise = require('bluebird');
 const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
-const requireFields = {
-    Post: ['email', 'role', 'fname', 'lname'],
-    createNew: ['email', 'fname', 'lname', 'specialty_id', 'course_id'],
-    createExist: ['user_id', 'specialty_id', 'course_id'],
-    Het: ['id'],
-    List: ['page', 'rowsPerPage']
-}
+const Joi = require('joi');
+
 
 module.exports = class {
+
+    /**
+     * Main Schema for all functions
+     */
+    static get Schema() {
+        return {
+            createNew: {
+                body: Joi.object().keys({
+                    email: Joi.string().email().required(),
+                    fname: Joi.string().required(),
+                    lname: Joi.string().required(),
+
+                    specialty_id: Joi.number().integer().required(),
+                    course_id: Joi.number().integer().required(),
+                })
+            },
+            createExist: {
+                body: Joi.object().keys({
+                    user_id: Joi.number().integer().required(),
+                    specialty_id: Joi.number().integer().required(),
+                    course_id: Joi.number().integer().required(),
+                })
+            },
+            Get: {
+                query: Joi.object().keys({
+                    id: Joi.number().integer().required(),
+                })
+            },
+            List: {
+                query: Joi.object().keys({
+                    page: Joi.number().integer(),
+                    rowsPerPage: Joi.number().integer(),
+                    descending: Joi.boolean(),
+                    sortBy: Joi.string(),
+                    totalItems: Joi.number().integer(),
+                    search: Joi.string().empty(''),
+                    course: Joi.number().integer(),
+                })
+            }
+        };
+    }
 
     /**
      * Function will return all users with paggination
@@ -24,18 +60,28 @@ module.exports = class {
      * @param {*} next 
      */
     static List(req, res, next) {
-        const { descending, sortBy } = req.query;
+        const { descending, sortBy, rowsPerPage, page, search, course } = req.query;
 
-        return RequireFilter
-            .Check(req.query, requireFields.List)
-            .then(validated => new RolesTypes.Students()
-                .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
-                .fetchPage({
-                    workspace_id: req.workspace.id,
-                    pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
-                    page: validated.page, // Defaults to 1 if not specified
-                    withRelated: ['user', 'user.roles', 'user.profile.avatar', 'specialty', 'course']
-                }))
+        return new RolesTypes
+            .Students()
+            .query(qb => {
+                qb.select('*').from('users');
+
+                qb.innerJoin('students', 'students.user_id', 'users.id')
+                if (search) {
+                    qb.orWhereRaw(`LOWER(email) LIKE ?`, [`%${_.toLower(search)}%`])
+                }
+                if (course)
+                    qb.where('course_id', course);
+
+            })
+            .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
+            .fetchPage({
+                workspace_id: req.workspace.id,
+                pageSize: rowsPerPage || 10, // Defaults to 10 if not specified
+                page, // Defaults to 1 if not specified
+                withRelated: ['user', 'user.roles', 'user.profile.avatar', 'specialty', 'course', 'groups']
+            })
             .then(result => {
                 return res.status(200).send({
                     items: result.toJSON(),
@@ -55,12 +101,11 @@ module.exports = class {
      * @param {*} next 
      */
     static createNew(req, res, next) {
-        return RequireFilter
-            .Check(req.body, requireFields.createNew)
-            .then(validated => new Users({
-                workspace_id: req.workspace.id,
-                email: validated.email
-            }).save())
+        return new Users({
+            workspace_id: req.workspace.id,
+            email: req.body.email
+        })
+            .save()
             .tap(newUser => newUser.related('profile').save({
                 fname: req.body.fname,
                 lname: req.body.lname
@@ -91,16 +136,14 @@ module.exports = class {
      */
     static createExist(req, res, next) {
 
-        return RequireFilter
-            .Check(req.body, requireFields.createExist)
-            .then(validated => new RolesTypes
-                .Students({
-                    workspace_id: req.workspace.id,
-                    user_id: validated.user_id,
-                    specialty_id: validated.specialty_id,
-                    course_id: validated.course_id
-                }).save()
-            )
+        return new RolesTypes
+            .Students({
+                workspace_id: req.workspace.id,
+                user_id: validated.user_id,
+                specialty_id: validated.specialty_id,
+                course_id: validated.course_id
+            })
+            .save()
             .then(newStuden => new Roles({
                 user_id: req.body.user_id,
                 role_id: newStuden.id,
@@ -119,7 +162,8 @@ module.exports = class {
      * @param {*} res 
      */
     static Get(req, res, next) {
-        return req.requestedUser
+        return req
+            .requestedUser
             .refresh({
                 withRelated: ['user.profile', 'user.roles', 'user.profile.avatar']
             })

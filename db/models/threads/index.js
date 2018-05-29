@@ -2,7 +2,7 @@
 
 
 module.exports = {
-    ThreadsCources: require('./ThreadsCourses.model'),
+    ThreadsCourses: require('./ThreadsCourses.model'),
     ThreadsGroups: require('./ThreadsGroups.model'),
-    ThreadStudents: require('./ThreadsStudents.model')
+    ThreadsStudents: require('./ThreadsStudents.model')
 }
