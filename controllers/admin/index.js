@@ -11,5 +11,7 @@ module.exports = {
     Subjects: require('./subjects.controller'),
     LessonTypes: require('./lessonTypes.controller'),
     Threads: require('./threads.controller'),
-    Groups: require('./groups.controller')
+    Groups: require('./groups.controller'),
+    Load: require('./loads.controller'),
+    LoadItems: require('./loadItems.controller')
 }

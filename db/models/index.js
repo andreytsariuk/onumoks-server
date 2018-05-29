@@ -15,5 +15,7 @@ module.exports = {
     Subjects: require('./Subjects.model'),
     LessonTypes: require('./LessonTypes.model'),
     Threads: require('./Threads.model'),
-    Groups: require('./Groups.model')
+    Groups: require('./Groups.model'),
+    Load: require('./Load.model'),
+    LoadItems: require('./LoadItems.model')
 }

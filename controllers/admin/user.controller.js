@@ -31,7 +31,8 @@ module.exports = class {
                     descending: Joi.boolean(),
                     sortBy: Joi.string(),
                     totalItems: Joi.number().integer(),
-                    search: Joi.string().empty('')
+                    search: Joi.string().empty(''),
+                    course: Joi.number().integer(),
                 })
             }
         };
@@ -46,13 +47,13 @@ module.exports = class {
      * @param {*} next 
      */
     static List(req, res, next) {
-        const { descending, sortBy } = req.query;
+        const { descending, sortBy, rowsPerPage, page, search, course } = req.query;
 
         return new Users()
             .query(qb => {
-                qb.select('*').from('users');
-                qb.leftOuterJoin('profiles', 'profiles.id', 'users.id')
                 if (search) {
+                    qb.select('*').from('profiles');
+                    qb.innerJoin('users', 'users.id', 'profiles.user_id');
                     qb.orWhereRaw(`LOWER(email) LIKE ?`, [`%${_.toLower(search)}%`]);
                     qb.orWhereRaw(`LOWER(fname) LIKE ?`, [`%${_.toLower(search)}%`]);
                     qb.orWhereRaw(`LOWER(lname) LIKE ?`, [`%${_.toLower(search)}%`]);
@@ -61,8 +62,8 @@ module.exports = class {
             .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
             .fetchPage({
                 workspace_id: req.workspace.id,
-                pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
-                page: validated.page, // Defaults to 1 if not specified
+                pageSize: rowsPerPage, // Defaults to 10 if not specified
+                page, // Defaults to 1 if not specified
                 withRelated: ['roles', 'profile', 'profile.avatar']
             })
             .then(result => {
