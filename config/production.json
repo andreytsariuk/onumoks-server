@@ -41,7 +41,7 @@
     },
     "Db": {
         "client": "pg",
-        "connection": "postgres://hvoobvjayftryx:d46aa8783a987adf9702f89c53e9e7af620d702f3aef71f8908580bae3145d83@ec2-79-125-110-209.eu-west-1.compute.amazonaws.com:5432/d2s6959hit9c8o",
+        "connection": "postgres://pinidesspthull:14652831628c147cca4dde1c6d13114342f6b0b8e10745c00ea83ad70954a193@ec2-54-217-233-71.eu-west-1.compute.amazonaws.com:5432/d6f01hslo411i0",
         "pool": {
             "min": 1,
             "max": 10
