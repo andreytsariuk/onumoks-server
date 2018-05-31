@@ -52,13 +52,12 @@ module.exports = class {
     }
 
     static Avatar(req, res, next) {
-        return req.workspace.related('avatar').path()
-            .then(validated => res.status(200).send(req.workspace))
+        return Promise.resolve(res.status(200).send(req.workspace))
             .catch(next);
     }
 
     static Get(req, res, next) {
-        return req.workspace.related('avatar').path()
+        return Promise.resolve(req.workspace.related('avatar').path())
             .then(validated => res.status(200).send(req.workspace))
             .catch(next);
     }

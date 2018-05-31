@@ -50,18 +50,15 @@ module.exports = class {
      * @param {*} next 
      */
     static Post(req, res, next) {
-        return RequireFilter
-            .Check(req.body, requireFields.Post)
-            .then(validated => new Users({
-                email: req.body.email,
-                password: md5(req.body.password),
-                workspace_id: req.body.workspace_id
+        return new Users({
+            email: req.body.email,
+            password: md5(req.body.password),
+            workspace_id: req.body.workspace_id
+        })
+            .fetch({
+                require: true,
+                withRelated: ['profile', 'profile.avatar', 'roles', 'workspace']
             })
-                .fetch({
-                    require: true,
-                    withRelated: ['profile', 'profile.avatar', 'roles', 'workspace']
-                },
-            ))
             .then(user => res.status(200).send({
                 user: user.toJSON(),
                 access_token: jwt.sign({ user }, config.get('secret')),
