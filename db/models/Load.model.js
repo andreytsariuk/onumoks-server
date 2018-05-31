@@ -16,7 +16,8 @@ module.exports = Bookshelf.model('Loads', Bookshelf.Model.extend({
     },
     virtuals: {
         summ_hours: function () {
-            return this.related('loadItems').count('hours_count');
+            let hours_array = this.related('loadItems').map(model => model.get('hours_count'));
+            return _.reduce(hours_array, (sum, n) => sum + parseFloat(n), 0)
         },
         // short_roles: function () {
         //     return this.related('roles').map(role => role.get('role_type'));

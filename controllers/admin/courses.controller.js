@@ -1,18 +1,43 @@
-const { RequireFilter } = require('../../filters');
-const md5 = require('md5');
 const { Courses, RolesTypes } = require('../../db/models');
-const Errors = require('../../errors');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
-const requireFields = {
-    Post: ['title', 'level', 'specialty_id'],
-    Het: ['id'],
-    List: ['page', 'rowsPerPage']
-}
+const Joi = require('joi');
+
 
 module.exports = class {
+
+    /**
+     * Main Schema for all functions
+     */
+    static get Schema() {
+        return {
+            Create: {
+                body: Joi.object().keys({
+                    title: Joi.string().required(),
+                    level: Joi.number().integer().required(),
+                    description: Joi.string().required(),
+                    specialty_id: Joi.number().integer().required(),
+                })
+            },
+            Get: {
+                query: Joi.object().keys({
+                    id: Joi.number().integer().required(),
+                })
+            },
+            List: {
+                query: Joi.object().keys({
+                    page: Joi.number().integer(),
+                    rowsPerPage: Joi.number().integer(),
+                    descending: Joi.boolean(),
+                    sortBy: Joi.string(),
+                    totalItems: Joi.number().integer(),
+                    search: Joi.string().empty(''),
+                })
+            }
+        };
+    }
 
     /**
      * Function will return all Courses with paggination
@@ -21,18 +46,21 @@ module.exports = class {
      * @param {*} next 
      */
     static List(req, res, next) {
-        const { descending, sortBy } = req.query;
+        const { descending, sortBy, rowsPerPage, page, search } = req.query;
 
-        return RequireFilter
-            .Check(req.query, requireFields.List)
-            .then(validated => new Courses()
-                .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
-                .fetchPage({
-                    workspace_id: req.workspace.id,
-                    pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
-                    page: validated.page, // Defaults to 1 if not specified
-                    withRelated: ['specialty', 'students', 'students.user']
-                }))
+        return new Courses()
+            .query(qb => {
+                if (search) {
+                    qb.orWhereRaw(`LOWER(name) LIKE ?`, [`%${_.toLower(search)}%`]);
+                }
+            })
+            .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
+            .fetchPage({
+                workspace_id: req.workspace.id,
+                pageSize: rowsPerPage, // Defaults to 10 if not specified
+                page, // Defaults to 1 if not specified
+                withRelated: ['specialty', 'students', 'students.user']
+            })
             .then(result => Promise
                 .map(result.models, model => Promise
                     .all([
@@ -66,15 +94,14 @@ module.exports = class {
      * @param {*} next 
      */
     static Post(req, res, next) {
-        return RequireFilter
-            .Check(req.body, requireFields.Post)
-            .then(validated => new Courses({
-                workspace_id: req.workspace.id,
-                title: validated.title,
-                level: validated.level,
-                specialty_id: validated.specialty_id,
-                description: validated.description
-            }).save())
+        return new Courses({
+            workspace_id: req.workspace.id,
+            title: req.body.title,
+            level: req.body.level,
+            specialty_id: req.body.specialty_id,
+            description: req.body.description
+        })
+            .save()
             .then(newCourse => res.status(201).send(newCourse))
             .catch(next);
     }

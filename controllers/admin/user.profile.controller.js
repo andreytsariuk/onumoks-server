@@ -1,24 +1,46 @@
-const fs = require('fs');
-
-
-const { RequireFilter } = require('../../filters');
-const md5 = require('md5');
 const { User, FilesType, Files } = require('../../db/models');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
-const { Server } = require('../../errors');
-
-
-const requireFields = {
-    Post: ['email', 'password'],
-    Het: ['id'],
-    List: ['page', 'perPage'],
-    Put: ['work_email', 'work_phone']
-}
+const Joi = require('joi');
 
 module.exports = class {
+
+    /**
+     * Main Schema for all functions
+     */
+    static get Schema() {
+        return {
+            Create: {
+                body: Joi.object().keys({
+                    title: Joi.string().required(),
+                    description: Joi.string().required(),
+
+                    students_ids: Joi.array().items(Joi.number().integer()).empty(undefined).empty(null),
+                    courses_ids: Joi.array().items(Joi.number().integer()).empty(undefined).empty(null),
+                    groups_ids: Joi.array().items(Joi.number().integer()).empty(undefined).empty(null),
+                })
+            },
+            Get: {
+                query: Joi.object().keys({
+                    id: Joi.number().integer().required(),
+                })
+            },
+            List: {
+                query: Joi.object().keys({
+                    page: Joi.number().integer(),
+                    rowsPerPage: Joi.number().integer(),
+                    descending: Joi.boolean(),
+                    sortBy: Joi.string(),
+                    totalItems: Joi.number().integer(),
+                    search: Joi.string().empty(''),
+                    course: Joi.number().integer(),
+                })
+            }
+        };
+    }
+
 
     /**
      * Function will upload avatar file and attach it to user
@@ -61,14 +83,10 @@ module.exports = class {
 
 
     static update(req, res, next) {
-        console.log('req.body', req.body);
-        return RequireFilter
-            .Check(req.body, requireFields.Put)
-            .then(validated => req
-                .requestedUser
-                .related('profile')
-                .save(req.body)
-            )
+        return req
+            .requestedUser
+            .related('profile')
+            .save(req.body)
             .then(user => req.requestedUser.refresh({
                 withRelated: ['roles', 'profile', 'profile.avatar']
             }))

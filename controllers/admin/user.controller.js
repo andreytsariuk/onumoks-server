@@ -1,14 +1,9 @@
-const { RequireFilter } = require('../../filters');
-const md5 = require('md5');
 const { Users, Roles, Courses, Specialties, Statuses } = require('../../db/models');
-const Errors = require('../../errors');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
-const requireFields = {
-    List: ['page', 'rowsPerPage']
-}
+const Joi = require('joi');
 
 module.exports = class {
 

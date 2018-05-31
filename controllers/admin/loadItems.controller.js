@@ -71,8 +71,12 @@ module.exports = class {
                         'group.course.specialty',
                         'thread',
                         'thread.groups',
+                        'thread.groups.course',
+                        'thread.groups.course.specialty',
                         'thread.courses',
+                        'thread.courses.specialty',
                         'thread.students',
+                        'thread.students.specialty',
                         'lessonType',
                         'subject',
                     ]
@@ -80,7 +84,7 @@ module.exports = class {
             new LoadItems()
                 .where('load_id', req.requestedLoad.id)
                 .fetchAll()
-                .then(res => res.models.map(model => model.get('id')))
+                .then(res => res.models.map(model => model.get('lesson_type_id')))
                 .then(arrayOfIds => _.uniq(arrayOfIds))
                 .then(arrayOfIds => new LessonTypes()
                     .query(qb => qb.whereIn('id', arrayOfIds))

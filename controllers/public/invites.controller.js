@@ -19,17 +19,14 @@ module.exports = class {
      * @param {*} next 
      */
     static get(req, res, next) {
-        return RequireFilter
-            .Check(req.query, requireFields.Get)
-            .then(validated => new Invites()
-                .where({
-                    token: validated.token
-                })
-                .fetch({
-                    require: true,
-                    withRelated: ['workspace', 'workspace.avatar']
-                })
-            )
+        return new Invites()
+            .where({
+                token: req.query.token
+            })
+            .fetch({
+                require: true,
+                withRelated: ['workspace', 'workspace.avatar']
+            })
             .then(invite => res.status(200).send(invite))
             .catch(next);
     }

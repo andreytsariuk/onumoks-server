@@ -2,18 +2,76 @@
 const Promise = require('bluebird');
 const _ = require('lodash');
 const moment = require('moment');
-const { RequireFilter } = require('../../filters');
-const config = require('config');
-const { Invites, Tokens, Roles, Users, } = require('../../db/models')
+const { Invites, Tokens, Users, } = require('../../db/models')
 const { EmailService } = require('../../services')
 const { InviteRulesHelper } = require('../../helpers')
-const requireFields = {
-    Create: ['email', 'rules', 'name'],
-    Get: [],
-    List: ['page', 'rowsPerPage']
-}
+const Joi = require('joi');
+
 
 module.exports = class {
+
+    /**
+     * Main Schema for all functions
+     */
+    static get Schema() {
+        return {
+            Create: {
+                body: Joi.object().keys({
+                    email: Joi.string().required(),
+                    name: Joi.string().required(),
+                    rules: Joi.any().required(),
+                })
+            },
+            Get: {
+                query: Joi.object().keys({
+                    id: Joi.number().integer().required(),
+                })
+            },
+            List: {
+                query: Joi.object().keys({
+                    page: Joi.number().integer(),
+                    rowsPerPage: Joi.number().integer(),
+                    descending: Joi.boolean(),
+                    sortBy: Joi.string(),
+                    totalItems: Joi.number().integer(),
+                    search: Joi.string().empty(''),
+                    course: Joi.number().integer(),
+                })
+            }
+        };
+    }
+
+    /**
+    * get all exist invites
+    * @param {*} req 
+    * @param {*} res 
+    * @param {*} next 
+    */
+    static List(req, res, next) {
+        const { descending, sortBy, rowsPerPage, page, search } = req.query;
+
+        return new Invites()
+            .query(qb => {
+                if (search) {
+                    qb.orWhereRaw(`LOWER(email) LIKE ?`, [`%${_.toLower(search)}%`]);
+                }
+            })
+            .where({
+                workspace_id: req.workspace.id
+            })
+            .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
+            .fetchPage({
+                pageSize: rowsPerPage,
+                page,
+                withRelated: ['user']
+            })
+
+            .then(result => res.status(200).send({
+                data: result.toJSON(),
+                pagination: result.pagination
+            }))
+            .catch(next)
+    }
 
     /**
      * Create new Invite by email and rules 
@@ -22,18 +80,12 @@ module.exports = class {
      * @param {*} next 
      */
     static create(req, res, next) {
-
-
-
-        return RequireFilter
-            .Check(req.body, requireFields.Create)
-            .then(validated => new Users()
-                .where({
-                    email: validated.email,
-                    workspace_id: req.workspace.id
-                })
-                .fetchAll()
-            )
+        return new Users()
+            .where({
+                email: req.body.email,
+                workspace_id: req.workspace.id
+            })
+            .fetchAll()
             .then(result => {
                 console.log('result', result)
                 if (result.models.length > 0)
@@ -83,33 +135,6 @@ module.exports = class {
     }
 
 
-    /**
-     * get all exist invites
-     * @param {*} req 
-     * @param {*} res 
-     * @param {*} next 
-     */
-    static list(req, res, next) {
-        const { descending, sortBy } = req.query;
 
-        return RequireFilter
-            .Check(req.query, requireFields.List)
-            .then(validated => new Invites()
-                .where({
-                    workspace_id: req.workspace.id
-                })
-                .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
-                .fetchPage({
-                    pageSize: validated.rowsPerPage,
-                    page: validated.page,
-                    withRelated: ['user']
-                })
-            )
-            .then(result => res.status(200).send({
-                data: result.toJSON(),
-                pagination: result.pagination
-            }))
-            .catch(next)
-    }
 
 }

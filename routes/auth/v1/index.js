@@ -2,12 +2,16 @@ const V1Router = require("express").Router();
 const config = require("config");
 const { Workspaces, Invites } = require('../../../db/models')
 const { WorkspaceController, AuthorizeController } = require('../../../controllers')
+const { ValidationMiddleware } = require('../../../middleware');
 
 
 
-V1Router.post("/user", AuthorizeController.Post);
-
-V1Router.post("/user", AuthorizeController.Post);
+V1Router
+  .post(
+    "/user",
+    ValidationMiddleware(AuthorizeController.Schema.Post),
+    AuthorizeController.Post
+  );
 
 
 
@@ -40,9 +44,18 @@ V1Router.param('invite', function (req, res, next, invite) {
     .catch(next)
 });
 
-V1Router.post("/sign-up/:workspace_name/invite/:invite", AuthorizeController.signUpViaInvite);
+V1Router
+  .post(
+    "/sign-up/:workspace_name/invite/:invite",
+    ValidationMiddleware(AuthorizeController.Schema.signUpViaInvite),
+    AuthorizeController.signUpViaInvite
+  );
 
-V1Router.get("/workspace/:workspace_name", WorkspaceController.Get);
+V1Router
+  .get(
+    "/workspace/:workspace_name",
+    WorkspaceController.Get
+  );
 
 
 module.exports = V1Router;

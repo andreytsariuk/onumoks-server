@@ -106,7 +106,7 @@ module.exports = class {
                     'loadItems.group.course',
                     'loadItems.group.course.specialty',
                     'loadItems.thread',
-                    'loadItems.thread.loads',
+                    'loadItems.thread.groups',
                     'loadItems.thread.courses',
                     'loadItems.thread.students',
                     'loadItems.lessonType',

@@ -1,18 +1,44 @@
-const { RequireFilter } = require('../../filters');
-const md5 = require('md5');
 const { Positions } = require('../../db/models');
-const Errors = require('../../errors');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
-const requireFields = {
-    Post: ['name', 'title'],
-    Het: ['id'],
-    List: ['page', 'rowsPerPage']
-}
+const Joi = require('joi');
 
 module.exports = class {
+
+    /**
+     * Main Schema for all functions
+     */
+    static get Schema() {
+        return {
+            Create: {
+                body: Joi.object().keys({
+                    name: Joi.string().required(),
+                    title: Joi.string().required(),
+                    hours_count: Joi.number().required(),
+                    description: Joi.string().required(),
+                })
+            },
+            Get: {
+                query: Joi.object().keys({
+                    id: Joi.number().integer().required(),
+                })
+            },
+            List: {
+                query: Joi.object().keys({
+                    page: Joi.number().integer(),
+                    rowsPerPage: Joi.number().integer(),
+                    descending: Joi.boolean(),
+                    sortBy: Joi.string(),
+                    totalItems: Joi.number().integer(),
+                    search: Joi.string().empty(''),
+                    course: Joi.number().integer(),
+                })
+            }
+        };
+    }
+
 
     /**
      * Function will return all Specialties with paggination
@@ -21,17 +47,20 @@ module.exports = class {
      * @param {*} next 
      */
     static List(req, res, next) {
-        const { descending, sortBy } = req.query;
+        const { descending, sortBy, rowsPerPage, page, search } = req.query;
 
-        return RequireFilter
-            .Check(req.query, requireFields.List)
-            .then(validated => new Positions()
-                .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
-                .fetchPage({
-                    workspace_id: req.workspace.id,
-                    pageSize: validated.rowsPerPage, // Defaults to 10 if not specified
-                    page: validated.page, // Defaults to 1 if not specified
-                }))
+        return new Positions()
+            .query(qb => {
+                if (search) {
+                    qb.orWhereRaw(`LOWER(name) LIKE ?`, [`%${_.toLower(search)}%`]);
+                }
+            })
+            .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
+            .fetchPage({
+                workspace_id: req.workspace.id,
+                pageSize: rowsPerPage, // Defaults to 10 if not specified
+                page, // Defaults to 1 if not specified
+            })
             .then(result => res.status(200)
                 .send({
                     items: result.toJSON(),
@@ -47,15 +76,14 @@ module.exports = class {
     * @param {*} next 
     */
     static Post(req, res, next) {
-        return RequireFilter
-            .Check(req.body, requireFields.Post)
-            .then(validated => new Positions({
-                workspace_id: req.workspace.id,
-                name: validated.name,
-                title: validated.title,
-                description: validated.description,
-                hours_count: validated.hours_count
-            }).save())
+        return new Positions({
+            workspace_id: req.workspace.id,
+            name: req.body.name,
+            title: req.body.title,
+            description: req.body.description,
+            hours_count: req.body.hours_count
+        })
+            .save()
             .then(newPosition => res.status(201).send(newPosition))
             .catch(next);
     }

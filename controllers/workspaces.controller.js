@@ -52,17 +52,13 @@ module.exports = class {
     }
 
     static Avatar(req, res, next) {
-        return RequireFilter
-            .Check(req.workspace, requireFields.Get)
-            .then(() => req.workspace.related('avatar').path())
+        return req.workspace.related('avatar').path()
             .then(validated => res.status(200).send(req.workspace))
             .catch(next);
     }
 
     static Get(req, res, next) {
-        return RequireFilter
-            .Check(req.workspace, requireFields.Get)
-            .then(() => req.workspace.related('avatar').path())
+        return req.workspace.related('avatar').path()
             .then(validated => res.status(200).send(req.workspace))
             .catch(next);
     }

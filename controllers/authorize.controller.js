@@ -1,22 +1,47 @@
-const { RequireFilter } = require('../filters');
 const { Users, Profiles, Invites, RolesTypes } = require('../db/models');
 const _ = require('lodash');
 const md5 = require('md5');
 const jwt = require('jsonwebtoken');
 const config = require('config');
-const requireFields = {
-    Post: ['email', 'password', 'workspace_id'],
-    Verify: ['token'],
-    signUpViaInvite: ['email', 'fname', 'lname', 'password', 'work_email', 'work_phone']
-}
-const Errors = require('../errors');
 const Promise = require('bluebird');
 const Bookshelf = require('../config/bookshelf');
 const knex = Bookshelf.knex;
 const { InviteRulesHelper } = require('../helpers');
-
+const Joi = require('joi');
 
 module.exports = class {
+
+    /**
+     * Main Schema for all functions
+     */
+    static get Schema() {
+        return {
+            Post: {
+                body: Joi.object().keys({
+                    email: Joi.string().email().required(),
+                    password: Joi.string().required(),
+                    workspace_id: Joi.number().integer().required(),
+                })
+            },
+            signUpViaInvite: {
+                body: Joi.object().keys({
+                    email: Joi.string().email().required(),
+                    password: Joi.string().required(),
+                    gender: Joi.string().empty('').empty(undefined).empty(null),
+                    fname: Joi.string().required(),
+                    lname: Joi.string().required(),
+                    work_phone: Joi.string().required(),
+                    work_email: Joi.string().required()
+                })
+            },
+            Verify: {
+                body: Joi.object().keys({
+                    token: Joi.string().required(),
+                })
+            }
+        };
+    }
+
 
     /**
      * 
@@ -28,9 +53,9 @@ module.exports = class {
         return RequireFilter
             .Check(req.body, requireFields.Post)
             .then(validated => new Users({
-                email: validated.email,
-                password: md5(validated.password),
-                workspace_id: validated.workspace_id
+                email: req.body.email,
+                password: md5(req.body.password),
+                workspace_id: req.body.workspace_id
             })
                 .fetch({
                     require: true,
@@ -54,9 +79,7 @@ module.exports = class {
     static signUpViaInvite(req, res, next) {
 
         return Bookshelf
-            .transaction((transacting) => RequireFilter
-                .Check(req.body, requireFields.signUpViaInvite)
-                .then(validated => req.invite.validate({ expired: false }))
+            .transaction((transacting) => req.invite.validate({ expired: false })
                 .then(invite => new Users({
                     email: req.body.email,
                     password: md5(req.body.password),
@@ -88,18 +111,13 @@ module.exports = class {
                                 throw new Error('unknown_role_type')
                         }
                     }))
-
             )
             .then(newRoles => req.user
                 .refresh({
                     require: true,
                     withRelated: ['roles']
                 })
-                .then(() => {
-
-                    console.log('req.user', )
-                    return newRoles;
-                }))
+                .then(() => newRoles))
             .map(role => req.user.related('roles').create({
                 role_id: role.id,
                 role_type: role.tableName
@@ -117,17 +135,14 @@ module.exports = class {
                 roles: user.roles
             }))
             .catch(err => {
-                console.log('err.message', err.message);
 
                 switch (true) {
                     case err.message.indexOf('unique constraint') !== -1:
-
-                        return next(new Error('sser_already_exists'))
+                        return next(new Error('user_already_exists'))
 
                     default:
                         return next(err);
                 }
-
             });
     }
 
@@ -138,10 +153,8 @@ module.exports = class {
      * @param {*} next 
      */
     static Verify(req, res, next) {
-        if (!RequireFilter.Check(req.body, requireFields.Verify))
-            return res.status(401).send('Unathorize')
 
-        new User({
+        return new User({
             access_token: _.get(req.body, 'token')
         })
             .fetch({ require: true })
@@ -158,15 +171,6 @@ module.exports = class {
                         res.status(500).send(err.message ? err.message : 'Server Error');
                         break;
                 }
-
             })
     }
 }
-
-// verify = (headers) => {
-//     if (headers && headers.authorization) {
-//       const split = headers.authorization.split(' ');
-//     if (split.length === 2) return split[1];
-//       else return null;
-//     } else return null;
-//   }
