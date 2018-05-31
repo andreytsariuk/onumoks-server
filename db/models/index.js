@@ -1,4 +1,7 @@
+let Clustering = require('./clustering');
+
 module.exports = {
+    ...Clustering,
     Users: require('./Users.model'),
     Roles: require('./Roles.model'),
     RolesTypes: require('./rolesTypes'),
