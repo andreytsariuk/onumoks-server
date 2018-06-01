@@ -2,7 +2,7 @@ const Router = require('express').Router;
 const { AdminController } = require('../../../../controllers');
 const { RolesTypes } = require('../../../../db/models');
 const { ValidationMiddleware } = require('../../../../middleware');
-
+const { FilesRouter } = require('./files.router');
 
 const LectorsRouter = Router();
 
@@ -40,6 +40,10 @@ LectorsRouter
     .get(
         '/:lector_id',
         AdminController.Lectors.Get
+    )
+    .use(
+        '/:lector_id/files',
+        FilesRouter
     );
 
 

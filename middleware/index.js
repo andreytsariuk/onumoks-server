@@ -4,5 +4,6 @@ module.exports = {
     AvatarUploadMiddleware: require('./avatar.middleware'),
     UserIdentityMiddleware: require('./userIdentity.middleware'),
     WorkspaceIdentityMiddleware: require('./workspaceIdentity.middleware'),
-    ValidationMiddleware: require('./validation.middleware')
+    ValidationMiddleware: require('./validation.middleware'),
+    FileMiddleware: require('./file.middleware')
 }

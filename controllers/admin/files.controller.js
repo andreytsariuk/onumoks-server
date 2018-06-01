@@ -1,7 +1,11 @@
-const { Files } = require('../../db/models');
+const { Files, FilesType } = require('../../db/models');
 const Promise = require('bluebird');
 const Joi = require('joi');
-
+const Bookshelf = require('../../config/bookshelf');
+const knex = Bookshelf.knex;
+const { S3Service } = require('../../services')
+const fs = require('fs');
+const config = require('config');
 
 module.exports = class {
 
@@ -65,6 +69,69 @@ module.exports = class {
                 pagination: result.pagination
             }))
             .catch(next)
+    }
+
+    /**
+    * Function will upload new file file and attach it to user
+     * @param {*} req 
+     * @param {*} res 
+     * @param {*} next 
+     */
+    static Create(req, res, next) {
+        let fileType;
+        let newFile = {};
+        switch (req.file_type) {
+            case 'articles':
+                fileType = 'Articles';
+                newFile = {
+                    name: req.file.filename,
+                    mime_type: req.file.mimetype,
+                    lector_id: req.requestedLector ? req.requestedLector.id : undefined
+                }
+                break;
+
+            default:
+                throw new Error('unknown_file_type')
+        }
+
+        return Bookshelf
+            .transaction(transacting => {
+                return new FilesType[fileType](newFile)
+                    .save(null, { transacting })
+                    .then(createdFileType => new Files({
+                        file_id: createdFileType.id,
+                        file_type: req.file_type,
+                        user_id: req.user.id,
+                        workspace_id: req.workspace.id
+                    })
+                        .save(null, { transacting })
+                        .then(() => createdFileType)
+                    )
+            })
+            .tap(createdFileType => Promise
+                .fromCallback(cb => fs
+                    .readFile(`./public/${req.file_type}/${createdFileType.get('name')}`, (err, data) => {
+                        if (err)
+                            throw err;
+
+
+                        const base64data = new Buffer(data, 'binary');
+
+                        return S3Service.put({
+                            Key: createdFileType.get('name'),
+                            Body: base64data,
+                            Bucket: config.get('AWS.S3.bucket')
+                        })
+                            .then((res) => createdFileType.save({
+                                s3_key:res.ETag
+                            }))
+                            .then(()=>cb())
+                            .catch(cb);
+                    })
+                )
+            )
+            .tap(createdFileType => res.status(201).send(createdFileType))
+            .catch(next);
     }
 
     /**

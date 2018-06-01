@@ -64,7 +64,8 @@ module.exports = class {
                                 file_type: 'avatars',
                                 user_id: req.requestedUser.id,
                                 workspace_id: req.workspace.id
-                            }).save(null, { transacting }),
+                            })
+                                .save(null, { transacting }),
                             req.requestedUser.related('profile').save({
                                 avatar_id: avatar.id
                             }, { transacting })

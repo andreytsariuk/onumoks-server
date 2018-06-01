@@ -7,16 +7,15 @@ exports.up = function (knex) {
       table
         .string("name");
       table
-        .string("description");
+        .string("color");
       table
-        .integer("min_agree")
-        .notNullable();
+        .string("description");
 
       table
-        .bigInteger("centroid")
-        .notNullable()
-        .references("documents.id")
-        .onDelete("CASCADE");
+        .double("difference")
+        .notNullable();
+
+      
 
       table
         .bigInteger("workspace_id")
@@ -36,6 +35,6 @@ exports.up = function (knex) {
 
 exports.down = function (knex) {
   return knex.schema
-    .dropTable("lesson_types")
+    .dropTable("clusters")
 
 };
