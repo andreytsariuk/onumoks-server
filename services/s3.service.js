@@ -30,6 +30,10 @@ class S3Service {
     return Promise.fromCallback(cb => this.s3.getObject(params, cb))
   }
 
+  delete(params) {
+    return Promise.fromCallback(cb => this.s3.deleteObject(params, cb));
+  }
+
   getFile(params) {
     return Promise.fromCallback(cb => this.s3.getSignedUrl('getObject', params, cb))
   }

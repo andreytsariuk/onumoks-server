@@ -78,6 +78,7 @@ module.exports = class {
      * @param {*} next 
      */
     static Create(req, res, next) {
+        console.log('BODY', req.body)
         let fileType;
         let newFile = {};
         switch (req.file_type) {
@@ -85,8 +86,10 @@ module.exports = class {
                 fileType = 'Articles';
                 newFile = {
                     name: req.file.filename,
+                    aricle_weight: req.body.aricle_weight ? req.body.aricle_weight : 0,
                     mime_type: req.file.mimetype,
-                    lector_id: req.requestedLector ? req.requestedLector.id : undefined
+                    lector_id: req.body.lector_id ? req.body.lector_id : undefined,
+                    subject_id: req.body.subject_id ? req.body.subject_id : undefined,
                 }
                 break;
 
@@ -102,6 +105,7 @@ module.exports = class {
                         file_id: createdFileType.id,
                         file_type: req.file_type,
                         user_id: req.user.id,
+                        title: req.body.title,
                         workspace_id: req.workspace.id
                     })
                         .save(null, { transacting })
@@ -123,9 +127,9 @@ module.exports = class {
                             Bucket: config.get('AWS.S3.bucket')
                         })
                             .then((res) => createdFileType.save({
-                                s3_key:res.ETag
+                                s3_key: res.ETag
                             }))
-                            .then(()=>cb())
+                            .then(() => cb())
                             .catch(cb);
                     })
                 )
@@ -165,7 +169,21 @@ module.exports = class {
      * @param {*} next 
      */
     static Delete(req, res, next) {
-
+        return S3Service
+            .delete({
+                Key: req.requestedFile.related('file').get('name'),
+                Bucket: config.get('AWS.S3.bucket')
+            })
+            .catch(err => {
+                console.log('Errr', err)
+                return {};
+            })
+            .then(() => req.requestedFile.related('file').destroy())
+            .then(() => req.requestedFile.destroy())
+            .then(thread => res.status(200).send({
+                code: 'thread_deleted'
+            }))
+            .catch(next);
     }
 
 

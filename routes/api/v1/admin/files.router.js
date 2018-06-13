@@ -26,13 +26,14 @@ FilesRouter
     )
     .param('file_id', function (req, res, next, file_id) {
         return new Files({ id: file_id })
-            .fetch({ require: true, withRelated: ['profile', 'roles'] })
+            .fetch({ require: true, withRelated: ['file'] })
             .then(requestedFile => req.requestedFile = requestedFile)
             .then(() => next())
             .catch(next);
     })
-    .put('/:user_id', AdminController.Files.Put)
-    .get('/:user_id', AdminController.Files.Get);
+    .put('/:file_id', AdminController.Files.Put)
+    .get('/:file_id', AdminController.Files.Get)
+    .delete('/:file_id', AdminController.Files.Delete);
 
 
 

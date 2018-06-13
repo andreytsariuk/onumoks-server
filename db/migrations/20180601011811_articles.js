@@ -11,11 +11,10 @@ exports.up = function (knex) {
             table
                 .string('name')
                 .notNullable();
-                table
+            table
                 .string('s3_key');
             table
                 .bigInteger("lector_id")
-                .notNullable()
                 .references("lectors.id")
                 .onDelete("CASCADE");
             table
