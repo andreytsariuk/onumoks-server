@@ -80,6 +80,13 @@ module.exports = class {
                     }),
                 searchInClusters(subject_id)
                     .then(findBestLectors)
+                    .catch(err => {
+                        if (err.message === 'empty_recomended') {
+                            return [];
+                        } else {
+                            throw err;
+                        }
+                    })
 
             ])
                 .spread((result, recommended) => {
@@ -234,7 +241,17 @@ function searchInClusters(subject_id) {
                     cluster,
                     count
                 }))))
-        .then(arrayOfClusters => _.maxBy(arrayOfClusters, 'count').cluster)
+        .then(arrayOfClusters => {
+            console.log('arrayOfClusters', arrayOfClusters)
+
+            let result = _.maxBy(arrayOfClusters, 'count');
+            if (result.count > 0) {
+                return result.cluster
+
+            } else {
+                throw new Error('empty_recomended');
+            }
+        })
 }
 
 function lectorStats(lector, cluster) {
@@ -272,5 +289,5 @@ function findBestLectors(cluster) {
                 })
         })
         .then(lectors => Promise.map(lectors.models, lector => lectorStats(lector, cluster)))
-        .then(lectors => _.orderBy(lectors, lector => lector.get('score')))
+        .then(lectors => _.orderBy(lectors, lector => lector.get('score'), 'desc'))
 }
