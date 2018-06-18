@@ -8,9 +8,11 @@ class S3Service {
 
   constructor() {
     this.s3 = new AWS.S3({
-      accessKeyId: config.get('AWS.S3.accessKeyId'),
-      secretAccessKey: config.get('AWS.S3.secretAccessKey'),
-      params: { Bucket: config.get('AWS.S3.bucket') }
+      accessKeyId: process.env.BUCKETEER_AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.BUCKETEER_AWS_SECRET_ACCESS_KEY,
+      params: {
+        Bucket: process.env.BUCKETEER_BUCKET_NAME
+      }
     });
   }
 
@@ -34,7 +36,7 @@ class S3Service {
     return Promise.fromCallback(cb => this.s3.deleteObject(params, cb));
   }
 
-  getFile(params) {
+  getSignedUrl(params) {
     return Promise.fromCallback(cb => this.s3.getSignedUrl('getObject', params, cb))
   }
 
