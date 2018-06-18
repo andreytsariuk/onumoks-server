@@ -15,7 +15,7 @@
         }
     },
     "Web": {
-        "Url": "https://instudy-web.herokuapp.com"
+        "Url": "https://instudy.com.ua"
     },
     "Server": {
         "Url": "https://instudy-backend.herokuapp.com",
