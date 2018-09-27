@@ -89,7 +89,6 @@ module.exports = class {
                     lector_id: req.requestedLector ? req.requestedLector.id : undefined
                 }
                 break;
-
             default:
                 throw new Error('unknown_file_type')
         }
@@ -113,19 +112,16 @@ module.exports = class {
                     .readFile(`./public/${req.file_type}/${createdFileType.get('name')}`, (err, data) => {
                         if (err)
                             throw err;
-
-
                         const base64data = new Buffer(data, 'binary');
-
                         return S3Service.put({
                             Key: createdFileType.get('name'),
                             Body: base64data,
                             Bucket: config.get('AWS.S3.bucket')
                         })
                             .then((res) => createdFileType.save({
-                                s3_key:res.ETag
+                                s3_key: res.ETag
                             }))
-                            .then(()=>cb())
+                            .then(() => cb())
                             .catch(cb);
                     })
                 )

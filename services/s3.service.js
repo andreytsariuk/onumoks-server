@@ -8,9 +8,9 @@ class S3Service {
 
   constructor() {
     this.s3 = new AWS.S3({
-      accessKeyId: config.get('AWS.S3.accessKeyId'),
-      secretAccessKey: config.get('AWS.S3.secretAccessKey'),
-      params: { Bucket: config.get('AWS.S3.bucket') }
+      accessKeyId: process.env.BUCKETEER_AWS_ACCESS_KEY_ID || config.get('AWS.S3.accessKeyId'),
+      secretAccessKey: process.env.BUCKETEER_AWS_SECRET_ACCESS_KEY || config.get('AWS.S3.secretAccessKey'),
+      params: { Bucket: process.env.BUCKETEER_BUCKET_NAME || config.get('AWS.S3.bucket') }
     });
   }
 
@@ -19,7 +19,7 @@ class S3Service {
 	 * @param {*} params 
 	 */
   put(params) {
-    return Promise.fromCallback(cb => this.s3.putObject(params, cb))
+    return Promise.fromCallback(cb => this.s3.putObject(params, cb));
   }
 
 	/**
@@ -27,13 +27,16 @@ class S3Service {
 	 * @param {*} params 
 	 */
   get(params) {
-    return Promise.fromCallback(cb => this.s3.getObject(params, cb))
+    return Promise.fromCallback(cb => this.s3.getObject(params, cb));
   }
 
+  /**
+   * 
+   * @param {*} params 
+   */
   getFile(params) {
-    return Promise.fromCallback(cb => this.s3.getSignedUrl('getObject', params, cb))
+    return Promise.fromCallback(cb => this.s3.getSignedUrl('getObject', params, cb));
   }
-
 
 }
 

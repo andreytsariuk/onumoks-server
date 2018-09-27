@@ -8,6 +8,7 @@ const Bookshelf = require('../config/bookshelf');
 const knex = Bookshelf.knex;
 const { InviteRulesHelper } = require('../helpers');
 const Joi = require('joi');
+const Errors = require('../errors')
 
 module.exports = class {
 

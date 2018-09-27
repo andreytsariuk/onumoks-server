@@ -63,8 +63,8 @@
     },
     "AWS": {
         "S3": {
-            "accessKeyId": "AKIAINFOAUUJAC44JQUQ",
-            "secretAccessKey": "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",
+            "accessKeyId": "AKIAJEMJB7G7SKVMDN3Q",
+            "secretAccessKey": "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",
             "bucket": "bucketeer-e96e0755-69a4-4966-aca3-3c536b7ad34e"
         }
     }
