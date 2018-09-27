@@ -23,7 +23,7 @@ LoadItemsRouter
         function (req, res, next, load_id) {
             return new LoadItems({ id: load_id })
                 .fetch({ require: true })
-                .then(requestedLoadItems => req.requestedLoadItems = requestedLoadItems)
+                .then(requestedLoadItem => req.requestedLoadItem = requestedLoadItem)
                 .then(() => next())
                 .catch(next);
         }
@@ -31,6 +31,10 @@ LoadItemsRouter
     .put(
         '/:load_id',
         AdminController.LoadItems.Put
+    )
+    .delete(
+        '/:load_id',
+        AdminController.LoadItems.Delete
     )
     .get(
         '/:load_id',

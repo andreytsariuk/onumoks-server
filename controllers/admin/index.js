@@ -13,5 +13,6 @@ module.exports = {
     Threads: require('./threads.controller'),
     Groups: require('./groups.controller'),
     Load: require('./loads.controller'),
-    LoadItems: require('./loadItems.controller')
+    LoadItems: require('./loadItems.controller'),
+    Keywords: require('./keywords.controller')
 }

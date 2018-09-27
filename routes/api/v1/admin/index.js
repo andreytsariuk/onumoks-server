@@ -12,6 +12,7 @@ const { LessonTypeRouter } = require('./lessonTypes.router');
 const { GroupRouter } = require('./groups.router');
 const { ThreadRouter } = require('./threads.router');
 const { LoadRouter } = require('./load.router');
+const { KeywordsRouter } = require('./keywords.router');
 
 
 
@@ -35,6 +36,7 @@ AdminRouter.use('/lesson-types', LessonTypeRouter);
 AdminRouter.use('/groups', GroupRouter);
 AdminRouter.use('/threads', ThreadRouter);
 AdminRouter.use('/load', LoadRouter);
+AdminRouter.use('/keywords', KeywordsRouter);
 
 
 

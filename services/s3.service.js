@@ -30,12 +30,12 @@ class S3Service {
     return Promise.fromCallback(cb => this.s3.getObject(params, cb));
   }
 
-  /**
-   * 
-   * @param {*} params 
-   */
-  getFile(params) {
-    return Promise.fromCallback(cb => this.s3.getSignedUrl('getObject', params, cb));
+  delete(params) {
+    return Promise.fromCallback(cb => this.s3.deleteObject(params, cb));
+  }
+
+  getSignedUrl(params) {
+    return Promise.fromCallback(cb => this.s3.getSignedUrl('getObject', params, cb))
   }
 
 }

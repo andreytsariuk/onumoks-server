@@ -64,6 +64,7 @@ module.exports = class {
                         'lector',
                         'lector.user',
                         'lector.user.profile',
+                        'lector.position',
                         'lector.user.profile.avatar',
                         'group',
                         'group.students',

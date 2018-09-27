@@ -1,5 +1,5 @@
 
-const { RolesTypes, Roles, Users } = require('../../db/models');
+const { RolesTypes, Roles, Users, FilesType, Clusters } = require('../../db/models');
 const _ = require('lodash');
 const Promise = require('bluebird');
 const Bookshelf = require('../../config/bookshelf');
@@ -41,11 +41,15 @@ module.exports = class {
                     sortBy: Joi.string(),
                     totalItems: Joi.number().integer(),
                     search: Joi.string().empty(''),
-                    course: Joi.number().integer(),
+                    subject_id: Joi.number().integer(),
                 })
             }
         };
     }
+
+
+
+
 
 
     /**
@@ -55,31 +59,68 @@ module.exports = class {
      * @param {*} next 
      */
     static List(req, res, next) {
-        const { descending, sortBy, rowsPerPage, page, search } = req.query;
+        const { descending, sortBy, rowsPerPage, page, search, subject_id } = req.query;
+        if (subject_id)
+            return Promise.all([
+                new RolesTypes.Lectors()
+                    .query(qb => {
+                        qb.select('*').from('users');
 
-        return new RolesTypes.Lectors()
-            .query(qb => {
-                qb.select('*').from('users');
+                        qb.innerJoin('lectors', 'lectors.user_id', 'users.id')
+                        if (search) {
+                            qb.orWhereRaw(`LOWER(email) LIKE ?`, [`%${_.toLower(search)}%`])
+                        }
+                    })
+                    .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
+                    .fetchPage({
+                        workspace_id: req.workspace.id,
+                        pageSize: rowsPerPage, // Defaults to 10 if not specified
+                        page, // Defaults to 1 if not specified
+                        withRelated: ['user', 'user.roles', 'user.profile.avatar', 'position']
+                    }),
+                searchInClusters(subject_id)
+                    .then(findBestLectors)
+                    .catch(err => {
+                        if (err.message === 'empty_recomended') {
+                            return [];
+                        } else {
+                            throw err;
+                        }
+                    })
 
-                qb.innerJoin('lectors', 'lectors.user_id', 'users.id')
-                if (search) {
-                    qb.orWhereRaw(`LOWER(email) LIKE ?`, [`%${_.toLower(search)}%`])
-                }
-            })
-            .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
-            .fetchPage({
-                workspace_id: req.workspace.id,
-                pageSize: rowsPerPage, // Defaults to 10 if not specified
-                page, // Defaults to 1 if not specified
-                withRelated: ['user', 'user.roles', 'user.profile.avatar', 'position']
-            })
-            .then(result => {
-                return res.status(200).send({
-                    items: result.toJSON(),
-                    pagination: result.pagination
-                });
-            })
-            .catch(next)
+            ])
+                .spread((result, recommended) => {
+                    return res.status(200).send({
+                        items: result.toJSON(),
+                        recommended,
+                        pagination: result.pagination
+                    });
+                })
+                .catch(next);
+        else
+            return new RolesTypes.Lectors()
+                .query(qb => {
+                    qb.select('*').from('users');
+
+                    qb.innerJoin('lectors', 'lectors.user_id', 'users.id')
+                    if (search) {
+                        qb.orWhereRaw(`LOWER(email) LIKE ?`, [`%${_.toLower(search)}%`])
+                    }
+                })
+                .orderBy(sortBy ? sortBy : 'created_at', descending === 'true' || !descending ? 'DESC' : 'ASC')
+                .fetchPage({
+                    workspace_id: req.workspace.id,
+                    pageSize: rowsPerPage, // Defaults to 10 if not specified
+                    page, // Defaults to 1 if not specified
+                    withRelated: ['user', 'user.roles', 'user.profile.avatar', 'position']
+                })
+                .then(result => {
+                    return res.status(200).send({
+                        items: result.toJSON(),
+                        pagination: result.pagination
+                    });
+                })
+                .catch(next)
     }
 
 
@@ -179,4 +220,74 @@ module.exports = class {
     }
 
 
+}
+
+
+
+
+function searchInClusters(subject_id) {
+
+    return new Clusters()
+        .fetchAll()
+        .then(clusters => Promise
+            .map(clusters.models, cluster => new FilesType
+                .Articles()
+                .where({
+                    cluster_id: cluster.id,
+                    subject_id: subject_id
+                })
+                .count()
+                .then(count => ({
+                    cluster,
+                    count
+                }))))
+        .then(arrayOfClusters => {
+            console.log('arrayOfClusters', arrayOfClusters)
+
+            let result = _.maxBy(arrayOfClusters, 'count');
+            if (result.count > 0) {
+                return result.cluster
+
+            } else {
+                throw new Error('empty_recomended');
+            }
+        })
+}
+
+function lectorStats(lector, cluster) {
+    console.log('lector', lector.id)
+    return new FilesType
+        .Articles()
+        .where({
+            lector_id: lector.id
+        })
+        .fetchAll()
+        .then(articles => _.reduce(articles.models,
+            (sum, article) => sum += 1 * parseFloat(article.get('aricle_weight')),
+            0))
+        .then(score => {
+            console.log('score', score)
+            lector.set('score', score);
+            return lector;
+        });
+}
+
+function findBestLectors(cluster) {
+    console.log('cluster', cluster.id)
+    return new FilesType
+        .Articles()
+        .where({
+            cluster_id: cluster.id
+        })
+        .fetchAll()
+        .then(articles => {
+            console.log('articles', articles.map(article => article.get('lector_id')))
+            return new RolesTypes.Lectors()
+                .query(qb => qb.whereIn('id', articles.map(article => article.get('lector_id'))))
+                .fetchAll({
+                    withRelated: ['user', 'user.roles', 'user.profile.avatar', 'position']
+                })
+        })
+        .then(lectors => Promise.map(lectors.models, lector => lectorStats(lector, cluster)))
+        .then(lectors => _.orderBy(lectors, lector => lector.get('score'), 'desc'))
 }

@@ -4,6 +4,9 @@ const Promise = require('bluebird');
 const Bookshelf = require('../../config/bookshelf');
 const knex = Bookshelf.knex;
 const Joi = require('joi');
+const { S3Service } = require('../../services')
+const fs = require('fs');
+const config = require('config');
 
 module.exports = class {
 
@@ -57,7 +60,23 @@ module.exports = class {
                         mime_type: req.file.mimetype
                     })
                     .save(null, { transacting })
-                    .then(avatar => Promise
+                    .tap(avatar => Promise
+                        .fromCallback(cb => fs
+                            .readFile(`./public/images/avatars/${avatar.get('name')}`, (err, data) => {
+                                if (err)
+                                    throw cb(err);
+                                const base64data = new Buffer(data, 'binary');
+                                return S3Service.put({
+                                    Key: avatar.get('name'),
+                                    Body: base64data,
+                                    Bucket: config.get('AWS.S3.bucket')
+                                })
+                                    .then(() => cb())
+                                    .catch(cb);
+                            })
+                        )
+                    )
+                    .tap(avatar => Promise
                         .all([
                             new Files({
                                 file_id: avatar.id,
@@ -71,7 +90,6 @@ module.exports = class {
                             }, { transacting })
                         ])
                     )
-                    .spread((file) => file)
             })
             .then(file => req.requestedUser.refresh({
                 withRelated: ['roles', 'profile', 'profile.avatar']
